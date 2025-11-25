@@ -1,0 +1,21 @@
+# Logs
+*.log
+
+# Dependências do Composer
+/vendor/
+
+# Arquivos temporários do PHPStorm ou VSCode
+.idea/
+.vscode/
+
+# Arquivos de cache
+*.cache
+*.tmp
+
+# Configurações locais
+.env
+.env.local
+
+# Arquivos de sistema
+Thumbs.db
+.DS_Store
