@@ -1,0 +1,173 @@
+
+/** Por: Geovane Gomes **/
+/***** em: 22Nov25 ******/
+
+/* Container */
+#message-container {
+    position: fixed;
+    gap: var(--space-10);
+    z-index: 9999999;
+    pointer-events: none;	
+}
+
+/* Toast base */
+.toast {
+    position: fixed;
+    top: 30px;
+    right: 30px;	
+    max-width: 800px;
+    padding: var(--space-5) var(--space-10);
+    border-radius: var(--radius-medium);
+    display: flex;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(235,242,255,0.12), rgba(220,230,250,0.06));
+   
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    font-size: var(--font-normal-em);
+    font-weight: var(--weight-medium);
+    line-height: 1.3;
+   	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+	opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity .35s cubic-bezier(0.25, 0.1, 0.25, 1),
+            transform .35s cubic-bezier(0.25, 0.1, 0.25, 1);  
+	pointer-events: auto;
+}
+
+/* Body content */
+.toast-body {
+    display: flex;
+    align-items: center;	
+	gap: 12px;
+}
+
+/* Icon container expects inline SVG */
+.toast-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+}
+
+/* message text */
+.toast-message-text {
+    line-height: 1.35;
+    font-size: 0.95rem;
+    color: inherit;
+    word-break: break-word;
+}
+
+/* Progress bar (scaleX) */
+.toast-bar {
+    position: absolute;
+    bottom: 0;
+    left: -2.5px;
+    height: 2px;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(1);
+	border-bottom-left-radius: var(--radius-regular);
+}
+
+/* Colors by type (background subtle + icon color + progress color + left border) */
+.toast-success {
+    color: var(--toast-text-success); 
+    border-left: 8px solid var(--toast-type-success);	
+}
+.toast-success .toast-bar { 
+    position: absolute;
+	bottom: 46px;
+	left: -1px;
+    background: linear-gradient(
+	            90deg,
+	            var(--toast-type-success),
+				var(--toast-fade-success));			
+}
+
+.toast-error {
+    color: var(--toast-text-error);
+    border-left: 8px solid var(--toast-type-error); 
+}
+.toast-error .toast-bar {
+	position: absolute;
+	bottom: 46px;
+	left: -1px;
+    background: linear-gradient(
+	            90deg,
+	            var(--toast-type-error),
+				var(--toast-fade-error));				
+}
+
+.toast-warning {
+    color: var(--toast-text-warning);
+    border-left: 8px solid var(--toast-type-warning);
+}
+
+.toast-warning .toast-bar { 
+    position: absolute;
+	bottom: 46px;
+	left: -1px;
+    background: linear-gradient(
+	            90deg,
+	            var(--toast-type-warning),
+				var(--toast-fade-warning));
+}
+
+.toast-info {
+    color: var(--toast-text-info);
+    border-left: 8px solid var(--toast-type-info); ;
+}
+.toast-info .toast-bar { 
+    position: absolute;
+	bottom: 46px;
+	left: -1px;
+    background: linear-gradient(
+	            90deg,
+	            var(--toast-type-info),
+				var(--toast-fade-info));
+}
+
+/* ==========================================================
+   ANIMAÇÃO DE ENTRADA / PAUSA / SAÍDA
+   ========================================================== */
+
+@keyframes ms-slide {
+    0% {
+        transform: translateX(140%);
+        opacity: 0;
+    }
+    10% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateX(0);
+        opacity: 1; /* pausa */
+    }
+    100% {
+        transform: translateX(-70%);
+        opacity: 0;
+    }
+}
+
+/* aplica a animação no toast */
+.toast {
+    transition: transform .45s cubic-bezier(0.25, 0.1, 0.25, 1),
+                opacity .45s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Entrada (centro da tela) */
+.toast-show {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+}
+
+/* Saída (vai para esquerda) */
+.toast-hide {
+    transform: translateX(-120%) !important;
+    opacity: 0 !important;
+}

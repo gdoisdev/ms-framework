@@ -1,0 +1,25 @@
+{
+  "name": "seuuser/ms-framework",
+  "description": "MS Framework - Serviço de Mensagens com Flash, AJAX e Persistência de Formulários",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "MSFramework\\Core\\": "src/Core/",
+      "MSFramework\\Flash\\": "src/Flash/",
+      "MSFramework\\Render\\": "src/Render/",
+      "MSFramework\\Integrations\\": "src/Integrations/",
+      "MSFramework\\Front\\": "src/Front/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "require": {
+    "php": ">=7.4"
+  },
+  "minimum-stability": "stable"
+}
+
+
+

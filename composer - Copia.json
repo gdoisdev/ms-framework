@@ -1,0 +1,18 @@
+{
+    "name": "msframework/msframework",
+    "description": "Message Service Framework for Hybrid PHP/JS Response Handling",
+    "autoload": {
+        "psr-4": {
+            "MSFramework\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.4"
+    },
+    "minimum-stability": "dev"
+}
+
+
