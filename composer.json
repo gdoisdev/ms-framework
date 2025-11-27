@@ -1,22 +1,27 @@
 {
-  "name": "gdoisdev/ms-framework",
-  "description": "MS Framework - Serviço de Mensagens com Flash e AJAX",
-  "type": "library",
-  "license": "MIT",
-
-  "autoload": {
-    "psr-4": {
-      "GdoisDev\\MSFramework\\": "src/"
+    "name": "gdoisdev/ms-framework",
+    "description": "MS Framework - Serviço de Mensagens com Flash e AJAX",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "GdoisDev\\MSFramework\\": "src/"
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
     },
-    "files": [
-      "src/Helpers/helpers.php"
+    "require": {
+        "php": ">=7.4"
+    },
+    "authors": [
+        {
+            "name": "Geovame G. Silva",
+            "email": "geovanegdois@gmail.com"
+        }
     ]
-  },
-
-  "require": {
-    "php": ">=7.4"
-  }
 }
+
 
 
 
