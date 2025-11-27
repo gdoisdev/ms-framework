@@ -6,9 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'MSFramework\\Render\\' => array($baseDir . '/src/Render'),
-    'MSFramework\\Integrations\\' => array($baseDir . '/src/Integrations'),
-    'MSFramework\\Front\\' => array($baseDir . '/src/Front'),
-    'MSFramework\\Flash\\' => array($baseDir . '/src/Flash'),
-    'MSFramework\\Core\\' => array($baseDir . '/src/Core'),
+    'GdoisDev\\MSFramework\\' => array($baseDir . '/src'),
 );

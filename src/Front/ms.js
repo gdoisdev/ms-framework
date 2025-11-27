@@ -8,7 +8,7 @@
     /* ------------------------------
        1 — Carrega CSS automaticamente
        ------------------------------ */
-    const cssPath = "/ms-framework/src/Front/ms.css";
+    const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
     const existingLink = document.querySelector(`link[href="${cssPath}"]`);
 
     if (!existingLink) {

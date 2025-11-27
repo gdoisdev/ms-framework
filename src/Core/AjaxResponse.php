@@ -1,16 +1,15 @@
 <?php
 
-/** Por: Geovane Gomes **/
-/***** em: 22Nov25 ******/
+/** Por: Geovane Gomes — em: 22Nov25 */
 
-namespace MSFramework\Core;
+namespace GdoisDev\MSFramework\Core;
 
 class AjaxResponse
 {
     protected array $response = [];
 
     /**
-     * Define uma mensagem de resposta
+     * Define uma mensagem de resposta.
      *
      * @param string $message
      * @param string $type (success|error|info|warning)
@@ -27,7 +26,7 @@ class AjaxResponse
     }
 
     /**
-     * Define um redirect após a resposta
+     * Define uma URL de redirecionamento.
      *
      * @param string $url
      * @return self
@@ -39,22 +38,26 @@ class AjaxResponse
     }
 
     /**
-     * Adiciona dados para atualizar ou substituir elementos na tela
+     * Adiciona instruções de atualização para elementos da interface.
      *
      * @param string $target CSS selector do elemento
      * @param string $html HTML a ser injetado
-     * @param string $mode 'update'|'replace'|'append'|'prepend'
+     * @param string $mode update|replace|append|prepend
      * @return self
      */
     public function update(string $target, string $html, string $mode = 'replace'): self
     {
-        $this->response[$mode] = $html;
-        $this->response['target'] = $target;
+        $this->response['updates'][] = [
+            'target' => $target,
+            'html'   => $html,
+            'mode'   => $mode,
+        ];
+
         return $this;
     }
 
     /**
-     * Adiciona dados de formulário persistido
+     * Anexa dados de formulário persistidos.
      *
      * @param array $oldData
      * @return self
@@ -66,7 +69,7 @@ class AjaxResponse
     }
 
     /**
-     * Envia a resposta JSON e termina o script
+     * Envia a resposta JSON e encerra a execução.
      *
      * @return void
      */

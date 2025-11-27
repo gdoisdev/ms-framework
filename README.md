@@ -1,19 +1,9 @@
 # MS Framework
 
-### Serviço de Mensagens Flash, Persistentes e AJAX
+**Micro-serviço de mensagens com Flash + AJAX | Toasts modernos e simples para qualquer sistema PHP.**
 
-**Por: Geovane “Gdois” Gomes**
-
-O **MS Framework** é uma biblioteca PHP minimalista para exibição de mensagens de interface, incluindo:
-
-✔️ Flash Messages (via sessão)
-✔️ Mensagens para requisições AJAX
-✔️ Estrutura organizada em PSR-4
-✔️ Renderização automática para JavaScript
-✔️ Helper global `ms()`
-✔️ Fácil integração em qualquer projeto PHP ou MVC customizado
-
-Ideal para sistemas que precisam de notificações consistentes entre requisições HTTP normais e requisições AJAX — sem dependência de frameworks externos.
+O **MS Framework** fornece uma API extremamente simples para criar, exibir e gerenciar mensagens de sistema (sucesso, erro, aviso, info). Funciona com **Flash Messages (backend)** e com chamadas diretas no **Front-End (AJAX)**.
+Ideal para aplicações MVC, microframeworks ou projetos customizados.
 
 ---
 
@@ -25,147 +15,185 @@ composer require gdoisdev/ms-framework
 
 ---
 
-## 📁 Estrutura do projeto
+## 🧩 Autoload (PSR-4)
+
+O pacote expõe o namespace:
+
+```
+GdoisDev\MSFramework\
+```
+
+E registra automaticamente os helpers do arquivo `src/helpers.php`.
+
+---
+
+## 🚀 Uso Básico no Backend
+
+### ➤ Criar mensagem flash
+
+```php
+ms()->success("Operação realizada com sucesso!");
+ms()->error("Falha ao processar requisição.");
+ms()->warning("Verifique os dados informados.");
+ms()->info("Tudo certo por aqui.");
+```
+
+### ➤ Redirecionar com mensagem
+
+```php
+ms()->success("Atualizado!")->redirect("/dashboard");
+```
+
+### ➤ Persistir formulários (opcional)
+
+```php
+ms()->persistForm(true)->warning("Preencha os campos obrigatórios");
+```
+
+---
+
+## 🎨 Exibir mensagens no Front-End (Flash + AJAX)
+
+O **MS Framework** funciona renderizando um JSON com as mensagens do backend:
+
+```php
+<?= ms()->flash()->render(); ?>
+```
+
+E o JavaScript exibe como toasts usando:
+
+```js
+MS.init(window._ms_messages);
+```
+
+---
+
+# 🔧 Como incluir o MS Framework na sua View / Layout
+
+Para que os toasts apareçam automaticamente, basta incluir **um CSS**, **um JS** e **o render do Flash**. A ordem é importante!
+
+## 1️⃣ Inclua o CSS no `<head>`
+
+```html
+<link rel="stylesheet" href="/ms-framework/src/Front/ms.css"/>
+```
+
+Esse CSS controla o estilo dos toasts e do container `#message-container`.
+
+---
+
+## 2️⃣ Inclua o JS e o Flash no final do `<body>`
+
+```html
+<script src="/ms-framework/src/Front/ms.js"></script>
+
+<!-- Injeta as mensagens geradas no backend -->
+<?= ms()->flash()->render(); ?>
+```
+
+### ✔ Ordem correta (muito importante):
+
+1. **Carrega `ms.js`** → cria `window.MS`
+2. **Executa `ms()->flash()->render()`** → cria `window._ms_messages`
+3. O JS automaticamente executa:
+
+```js
+MS.init(window._ms_messages);
+```
+
+E os toasts aparecem.
+
+---
+
+# 🧱 Modelo Completo de Layout
+
+```html
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema XPTO</title>
+
+    <!-- MS Framework CSS -->
+    <link rel="stylesheet" href="/ms-framework/src/Front/ms.css"/>
+</head>
+
+<body>
+
+    <!-- conteúdo -->
+    <?= $this->section('content') ?>
+
+    <!-- MS Framework JS -->
+    <script src="/ms-framework/src/Front/ms.js"></script>
+
+    <!-- Injeta as mensagens do backend -->
+    <?= ms()->flash()->render(); ?>
+
+</body>
+</html>
+```
+
+---
+
+# ⚡ Usando o Framework no Front-End (AJAX)
+
+Você pode exibir toasts manualmente:
+
+```js
+MS.show("success", "Mensagem gerada pelo JavaScript!");
+```
+
+Ou atualizar mensagens após requisições AJAX:
+
+```js
+fetch("/api/save")
+    .then(r => r.json())
+    .then(data => {
+        MS.init(data.messages); // já no formato do backend
+    });
+```
+
+---
+
+# 🧪 Tipos de Mensagem
+
+| Tipo      | Descrição                       |
+| --------- | ------------------------------- |
+| `success` | Ação concluída com sucesso      |
+| `error`   | Problema ou exceção             |
+| `warning` | Atenção, algo pode estar errado |
+| `info`    | Apenas informação               |
+
+---
+
+# 📁 Estrutura do Pacote
 
 ```
 src/
   Core/
-  Flash/
-  Render/
-  Integrations/
-    Http/
+  Front/
+    ms.js
+    ms.css
+  Helpers/
   Support/
   helpers.php
-```
-
-Namespaces seguem PSR-4 no padrão:
-
-```
-GdoisDev\MSFramework\*
+composer.json
+README.md
 ```
 
 ---
 
-## 🚀 Uso Básico
+# 🔖 Versionamento
 
-### 1. Criando uma mensagem
+Versão inicial publicada:
 
-```php
-ms()->success("Operação realizada com sucesso!");
 ```
-
-Outros tipos disponíveis:
-
-```php
-ms()->info("Informação importante");
-ms()->warning("Atenção ao preencher o formulário");
-ms()->error("Não foi possível processar a requisição");
+v1.0.0
 ```
 
 ---
 
-## 🔁 Exibindo mensagens automaticamente
+# 🧰 Licença
 
-### Para páginas PHP normais:
-
-```php
-echo ms()->render();
-```
-
-Isso renderiza:
-
-```html
-<script>
-    window._ms_messages = [...]
-</script>
-```
-
-O seu script JS captura e exibe os toasts automaticamente.
-
----
-
-## ⚡ Respostas AJAX
-
-No seu controller:
-
-```php
-use GdoisDev\MSFramework\Integrations\Http\HttpHelper;
-
-HttpHelper::respondOrRedirect();
-```
-
-Ou, redirecionando com mensagens:
-
-```php
-HttpHelper::respondOrRedirect('/dashboard');
-```
-
----
-
-## 📌 Uso com JavaScript
-
-O backend envia:
-
-```
-window._ms_messages = [
-  {
-    type: "success",
-    message: "Salvo!",
-    iconSvg: "<svg>…</svg>",
-    timeout: 5000
-  },
-  …
-];
-```
-
-Basta seu script de toasts consumir essa variável.
-
----
-
-## 🎨 Personalização
-
-Você pode substituir:
-
-* Renderizador de views
-* Estrutura de mensagens
-* Output JavaScript
-* Tempo padrão
-* Ícones SVG
-
-Tudo é modular e fácil de estender.
-
----
-
-## 🧪 Requisitos
-
-* **PHP 7.4+**
-* Sessões habilitadas
-
----
-
-## 🔖 Versionamento e Changelog
-
-### **v1.0.0 — Lançamento inicial**
-
-* Sistema completo de mensagens Flash
-* Mensagens para AJAX via `AjaxResponse`
-* Estrutura PSR-4
-* Helper global `ms()`
-* Formatador para o front-end
-* ViewRenderer nativo
-* HttpHelper integrado
-* Compatível com qualquer MVC custom
-
----
-
-## 📜 Licença
-
-MIT.
-Livre para uso comercial e pessoal.
-
----
-
-## ✨ Autor
-
-**Geovane Gomes (GdoisDev)**
-Criador do MS Framework.
+Licença **MIT** – livre para uso comercial e pessoal.

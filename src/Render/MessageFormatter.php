@@ -1,9 +1,9 @@
 <?php
 
-namespace MSFramework\Render;
+namespace GdoisDev\MSFramework\Render;
 
-use MSFramework\Core\Message;
-use MSFramework\Core\SessionMessage;
+use GdoisDev\MSFramework\Core\Message;
+use GdoisDev\MSFramework\Core\SessionMessage;
 
 class MessageFormatter
 {
@@ -19,10 +19,10 @@ class MessageFormatter
 
         foreach ($messages as $msg) {
             $formatted[] = [
-                'type' => $msg['type'] ?? 'info',
-                'message' => $msg['text'] ?? '',
+                'type'    => $msg['type'] ?? 'info',
+                'message' => $msg['message'] ?? '',   // Corrigido: era 'text'
                 'iconSvg' => $msg['icon'] ?? null,
-                'timeout' => $msg['timeout'] ?? 5000,
+                'timeout' => $msg['duration'] ?? 5000, // Corrigido: era 'timeout'
             ];
         }
 
@@ -38,10 +38,10 @@ class MessageFormatter
     public static function singleForJS(Message $message): array
     {
         return [
-            'type' => $message->getType(),
+            'type'    => $message->getType(),
             'message' => $message->getText(),
             'iconSvg' => $message->getIcon(),
-            'timeout' => $message->getTimeout(),
+            'timeout' => $message->getDuration(), // Corrigido: era getTimeout()
         ];
     }
 }

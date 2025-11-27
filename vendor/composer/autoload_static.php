@@ -7,40 +7,20 @@ namespace Composer\Autoload;
 class ComposerStaticInitf9ea9e636fb6596f8ddc0d89528e48c4
 {
     public static $files = array (
-        '75b673723c8065bc21fdab6e4e0eb32a' => __DIR__ . '/../..' . '/src/helpers.php',
+        'ab70bbd8631566aadea14242f029f232' => __DIR__ . '/../..' . '/src/helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'M' => 
+        'G' => 
         array (
-            'MSFramework\\Render\\' => 19,
-            'MSFramework\\Integrations\\' => 25,
-            'MSFramework\\Front\\' => 18,
-            'MSFramework\\Flash\\' => 18,
-            'MSFramework\\Core\\' => 17,
+            'GdoisDev\\MSFramework\\' => 21,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'MSFramework\\Render\\' => 
+        'GdoisDev\\MSFramework\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/src/Render',
-        ),
-        'MSFramework\\Integrations\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src/Integrations',
-        ),
-        'MSFramework\\Front\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src/Front',
-        ),
-        'MSFramework\\Flash\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src/Flash',
-        ),
-        'MSFramework\\Core\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src/Core',
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

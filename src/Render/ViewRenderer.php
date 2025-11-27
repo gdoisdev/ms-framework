@@ -1,6 +1,6 @@
 <?php
 
-namespace MSFramework\Render;
+namespace GdoisDev\MSFramework\Render;
 
 class ViewRenderer
 {
@@ -36,4 +36,3 @@ class ViewRenderer
         return ob_get_clean();
     }
 }
-

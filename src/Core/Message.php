@@ -1,9 +1,12 @@
 <?php
 
-/** Por: Geovane Gomes **/
-/***** em: 22Nov25 ******/
+/**
+ * MS Framework - Message
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
+ */
 
-namespace MSFramework\Core;
+namespace GdoisDev\MSFramework\Core;
 
 class Message
 {
@@ -21,13 +24,17 @@ class Message
     /**
      * Construtor
      *
-     * @param string $text
-     * @param string $type
+     * @param string      $text
+     * @param string      $type
      * @param string|null $icon
-     * @param int $duration
+     * @param int         $duration
      */
-    public function __construct(string $text, string $type = self::TYPE_INFO, ?string $icon = null, int $duration = 5000)
-    {
+    public function __construct(
+        string $text,
+        string $type = self::TYPE_INFO,
+        ?string $icon = null,
+        int $duration = 5000
+    ) {
         $this->text     = $text;
         $this->type     = $type;
         $this->icon     = $icon;
@@ -36,9 +43,6 @@ class Message
 
     /**
      * Define se a mensagem deve persistir na sessão
-     *
-     * @param bool $persist
-     * @return self
      */
     public function persist(bool $persist = true): self
     {
@@ -47,9 +51,7 @@ class Message
     }
 
     /**
-     * Retorna a mensagem em array, pronta para JSON
-     *
-     * @return array
+     * Retorna a mensagem como array pronta para JSON
      */
     public function toArray(): array
     {
@@ -62,20 +64,35 @@ class Message
         ];
     }
 
-    /**
-     * Getters
-     */
-    public function getText(): string { return $this->text; }
-    public function getType(): string { return $this->type; }
-    public function getIcon(): ?string { return $this->icon; }
-    public function getDuration(): int { return $this->duration; }
+    /** Getters */
+    public function getText(): string     { return $this->text; }
+    public function getType(): string     { return $this->type; }
+    public function getIcon(): ?string    { return $this->icon; }
+    public function getDuration(): int    { return $this->duration; }
     public function shouldPersist(): bool { return $this->persist; }
 
-    /**
-     * Setters
-     */
-    public function setText(string $text): self { $this->text = $text; return $this; }
-    public function setType(string $type): self { $this->type = $type; return $this; }
-    public function setIcon(?string $icon): self { $this->icon = $icon; return $this; }
-    public function setDuration(int $duration): self { $this->duration = $duration; return $this; }
+    /** Setters */
+    public function setText(string $text): self
+    {
+        $this->text = $text;
+        return $this;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function setIcon(?string $icon): self
+    {
+        $this->icon = $icon;
+        return $this;
+    }
+
+    public function setDuration(int $duration): self
+    {
+        $this->duration = $duration;
+        return $this;
+    }
 }
