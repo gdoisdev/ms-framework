@@ -113,8 +113,7 @@ E os toasts aparecem.
 
 <head>
     <meta charset="UTF-8">
-    <title>Sistema XPTO</title>
-
+    
     <!-- MS Framework CSS -->
     <link rel="stylesheet" href="/ms-framework/src/Front/ms.css"/>
 </head>

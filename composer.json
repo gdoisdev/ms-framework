@@ -9,7 +9,7 @@
       "GdoisDev\\MSFramework\\": "src/"
     },
     "files": [
-      "src/helpers.php"
+      "src/Helpers/helpers.php"
     ]
   },
 
