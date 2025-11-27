@@ -3,7 +3,7 @@
 /** Por: Geovane Gomes **/
 /***** em: 22Nov25 ******/
 
-use MSFramework\Core\MS;
+use GdoisDev\MSFramework\Core\MS;
 
 if (!function_exists('ms')) {
     function ms(): MS
