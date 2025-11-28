@@ -1,33 +1,31 @@
 /* ======================================================
-   MS Framework - THEME (Fluido via clamp)
-   Paleta moderna e totalmente customizável
+   MS Framework - Tema Padrão (v1.0.8)
+   Criado por Geovane Gomes em 28Nov25
    ====================================================== */
 
 :root {
     /* ===========================
        PALETA PRINCIPAL
        =========================== */
+    --toast-type-success: #38c172;
+    --toast-fade-success: rgba(56, 193, 114, 0.35);
+    --toast-text-success: #196c2c;
 
-    --toast-type-success: #28a745;
-    --toast-fade-success: rgba(40, 167, 69, 0.35);
-    --toast-text-success: #e9fbe9;
-
-    --toast-type-error: #dc3545;
-    --toast-fade-error: rgba(220, 53, 69, 0.35);
-    --toast-text-error: #ffecec;
+    --toast-type-error: #e4606d;
+    --toast-fade-error: rgba(228, 96, 109, 0.35);
+    --toast-text-error: #a71d2a;
 
     --toast-type-warning: #ffc107;
     --toast-fade-warning: rgba(255, 193, 7, 0.40);
-    --toast-text-warning: #fff8e1;
+    --toast-text-warning: #333300;
 
     --toast-type-info: #17a2b8;
     --toast-fade-info: rgba(23, 162, 184, 0.35);
-    --toast-text-info: #e8f9fc;
+    --toast-text-info: #0f4c57;
 
     /* ===========================
        ESPAÇAMENTO FLUIDO (clamp)
        =========================== */
-
     --space-5: clamp(0.20rem, 0.40vw, 0.35rem);
     --space-10: clamp(0.35rem, 0.60vw, 0.65rem);
     --space-15: clamp(0.60rem, 1.00vw, 0.90rem);
@@ -53,12 +51,10 @@
        LAYOUT
        =========================== */
     --toast-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
-
     --toast-bg-gradient: linear-gradient(
         180deg,
         rgba(235, 242, 255, 0.12),
         rgba(220, 230, 250, 0.06)
     );
-
     --toast-blur: blur(18px);
 }
