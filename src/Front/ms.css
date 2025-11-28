@@ -1,7 +1,5 @@
-
 /** Por: Geovane Gomes **/
 /***** em: 22Nov25 ******/
-
 /* Container */
 #message-container {
     position: fixed;
@@ -13,8 +11,8 @@
 /* Toast base */
 .toast {
     position: fixed;
-    top: 30px;
-    right: 30px;	
+    top: var(--space-30);
+    right: var(--space-30);	
     max-width: 800px;
     padding: var(--space-5) var(--space-10);
     border-radius: var(--radius-medium);
@@ -56,7 +54,7 @@
 /* message text */
 .toast-message-text {
     line-height: 1.35;
-    font-size: 0.95rem;
+    font-size: var(--font-normal-em);
     color: inherit;
     word-break: break-word;
 }
@@ -80,7 +78,7 @@
 }
 .toast-success .toast-bar { 
     position: absolute;
-	bottom: 46px;
+	bottom: var(--space-45); /*46px;*/
 	left: -1px;
     background: linear-gradient(
 	            90deg,
@@ -94,7 +92,7 @@
 }
 .toast-error .toast-bar {
 	position: absolute;
-	bottom: 46px;
+	bottom: var(--space-45); /*46px;*/
 	left: -1px;
     background: linear-gradient(
 	            90deg,
@@ -109,7 +107,7 @@
 
 .toast-warning .toast-bar { 
     position: absolute;
-	bottom: 46px;
+	bottom: var(--space-45); /*46px;*/
 	left: -1px;
     background: linear-gradient(
 	            90deg,
@@ -123,7 +121,7 @@
 }
 .toast-info .toast-bar { 
     position: absolute;
-	bottom: 46px;
+	bottom: var(--space-45); /*46px;*/
 	left: -1px;
     background: linear-gradient(
 	            90deg,

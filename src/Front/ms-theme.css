@@ -1,0 +1,128 @@
+/* ============================== */
+/*   MS Framework - Tema Padrão   */
+/*       Por: Geovane Gomes       */
+/*           em: 22Nov25          */
+/* ============================== */
+   
+:root {
+	/***** CORES *****/
+	
+    /* =======================
+       Bordas e Inputs
+       ======================= */
+    --color-border-input: #CCCCCC;
+    --color-border-button: #007bff;
+    --color-border-toast: #cccccc;
+
+    /* =======================
+       Texto
+       ======================= */
+    --color-text-default: #333333;
+    --color-text-toast: #ffffff;
+    --color-text-button: #ffffff;
+
+    /* =======================
+       Backgrounds
+       ======================= */
+    --color-bg-toast-success: #28a745;
+    --color-bg-toast-error: #dc3545;
+    --color-bg-toast-warning: #ffc107;
+    --color-bg-toast-info: #17a2b8;
+    --color-bg-button: #007bff;
+    --color-bg-input: #ffffff;
+
+    /* =======================
+       Ícones Toast
+       ======================= */
+    --color-icon-toast-success: #ffffff;
+    --color-icon-toast-error: #ffffff;
+    --color-icon-toast-warning: #333333;
+    --color-icon-toast-info: #ffffff;
+
+    /* =======================
+       Sombra e efeitos
+       ======================= */
+    --shadow-toast: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius-toast: 6px;
+    --border-radius-input: 4px;
+    --border-radius-button: 4px;
+	
+	/***** FONTES *****/
+	/* Escala modular/contextual */
+	--font-nano-em:    clamp(0.45em, 0.6vw, 0.5em);
+	--font-micro-em:   clamp(0.6em, 0.8vw, 0.7em);
+	--font-mini-em:    clamp(0.7em, 1vw, 0.8em);
+	--font-small-em:   clamp(0.8em, 1.2vw, 0.9em);
+	--font-normal-em:  clamp(0.9em, 1.5vw, 1em);
+	--font-extra-em:   clamp(1em, 1.8vw, 1.1em);
+	--font-medium-em:  clamp(1.1em, 2vw, 1.2em);
+	--font-bigger-em:  clamp(1.2em, 2.2vw, 1.3em);
+	--font-large-em:   clamp(1.3em, 2.5vw, 1.4em);
+	--font-giant-em:   clamp(1.4em, 2.7vw, 1.5em);
+	--font-max-em:     clamp(1.8em, 4vw, 2em);
+	--font-ultra-em:   clamp(2em, 4.5vw, 2.2em);
+	--font-mega-em:    clamp(2.2em, 5vw, 2.4em);
+	--font-super-em:   clamp(2.4em, 5.5vw, 2.6em);
+	--font-legend-em:  clamp(2.6em, 6vw, 2.8em);
+	--font-epic-em:    clamp(2.8em, 6.5vw, 3em);
+	
+	/* Escala modular/contextual – com em */
+	--font-giant-plus-em:   clamp(1.6em, 3.2vw, 1.75em);
+    --font-max-minus-em:    clamp(1.7em, 3.6vw, 1.9em);
+    --font-ultra-minus-em:  clamp(1.9em, 4.2vw, 2.1em);
+    --font-ultra-plus-em:   clamp(2.1em, 4.8vw, 2.3em);
+    --font-mega-plus-em:    clamp(2.3em, 5.2vw, 2.5em);
+    --font-super-plus-em:   clamp(2.5em, 5.8vw, 2.7em);
+
+
+	/* Fontes - Familias*/
+    --font-family-sans: 'Arial', sans-serif;
+    --font-family-serif: 'Georgia', serif;
+    --font-family-mono: 'Courier New', monospace;
+
+    /* Fontes - Tamanhos */
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+
+	--weight-thin: 100;
+	--weight-extra-light: 200;
+	--weight-light: 300;
+	--weight-regular: 400;
+	--weight-medium: 500;
+	--weight-semi-bold: 600;
+	--weight-bold: 700;
+	--weight-extra-bold: 800;
+	--weight-black: 900;
+	
+	/***** ESPAÇOS P/ PADDING E MARGIN *****/
+	--space-0: 0rem;
+    --space-5: clamp(0.3125rem, 1vw, 0.625rem);    /* 5–10px */
+    --space-10: clamp(0.625rem, 1.2vw, 0.9375rem); /* 10–15px */
+    --space-15: clamp(0.9375rem, 1.5vw, 1.25rem);  /* 15–20px */
+    --space-20: clamp(1.25rem, 1.8vw, 1.5625rem);  /* 20–25px */
+    --space-25: clamp(1.5625rem, 2vw, 1.875rem);   /* 25–30px */
+    --space-30: clamp(1.875rem, 2.2vw, 2.1875rem); /* 30–35px */
+    --space-35: clamp(2.1875rem, 2.5vw, 2.5rem);   /* 35–40px */
+    --space-40: clamp(2.5rem, 2.8vw, 2.8125rem);   /* 40–45px */
+    --space-45: clamp(2.8125rem, 3vw, 3.125rem);   /* 45–50px */
+    --space-50: clamp(3.125rem, 3.2vw, 3.4375rem); /* 50–55px */
+    --space-55: clamp(3.4375rem, 3.4vw, 3.75rem);  /* 55–60px */
+    --space-60: clamp(3.75rem, 3.6vw, 4.0625rem);  /* 60–65px */
+    --space-65: clamp(4.0625rem, 3.8vw, 4.375rem); /* 65–70px */
+    --space-70: clamp(4.375rem, 4vw, 4.6875rem);   /* 70–75px */
+    --space-75: clamp(4.6875rem, 4.2vw, 5rem);     /* 75–80px */
+    --space-80: clamp(5rem, 4.5vw, 5.3125rem);     /* 80–85px */
+    --space-85: clamp(5.3125rem, 4.8vw, 5.625rem); /* 85–90px */
+    --space-90: clamp(5.625rem, 5vw, 5.9375rem);   /* 90–95px */
+    --space-95: clamp(5.9375rem, 5.2vw, 6.25rem);  /* 95–100px */
+    --space-100: clamp(6.25rem, 5.5vw, 6.5625rem); /* 100–105px */
+	
+	/* CANTOS REDONDOS */
+	--radius-light: 3px;
+	--radius-regular: 5px;
+	--radius-medium: 10px;
+	--radius-large: 20px;
+	--radius-round: 50%;
+}
