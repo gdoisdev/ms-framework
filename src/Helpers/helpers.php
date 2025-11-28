@@ -2,6 +2,7 @@
 
 /** Por: Geovane Gomes **/
 /***** em: 22Nov25 ******/
+/* alterado em: 27Nov25 */
 
 use GdoisDev\MSFramework\Core\MS;
 
