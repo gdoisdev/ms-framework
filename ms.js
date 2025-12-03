@@ -1,6 +1,6 @@
-/**
- * MS Framework - AJAX + Toast Unificado
- * by Geovane Gomes & ChatGPT
+/** MS Framework - Toast Flash 1.0
+ *  by Geovane Gomes
+ *  Leve • Sem dependências • Plug-and-play
  */
 
 (function () {
@@ -8,9 +8,10 @@
     /* ------------------------------
        1 — Carrega CSS automaticamente
        ------------------------------ */
-    const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
-
+	const cssPath = "/ms-framework/ms.css";   
+    //const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
     const existingLink = document.querySelector(`link[href="${cssPath}"]`);
+
     if (!existingLink) {
         const link = document.createElement("link");
         link.rel = "stylesheet";
@@ -19,7 +20,7 @@
     }
 
     /* ------------------------------
-       2 — Container de mensagens
+       2 — Cria o container se não existir
        ------------------------------ */
     const containerId = "message-container";
 
@@ -39,7 +40,7 @@
     }
 
     /* ------------------------------
-       3 — Ícones
+       3 — Ícones Inline SVG (herda cor)
        ------------------------------ */
     const svgIcons = {
         success: `
@@ -73,7 +74,7 @@
     };
 
     /* ------------------------------
-       4 — Toast + Fila
+       4 — Sistema de fila sofisticado
        ------------------------------ */
     let queue = [];
     let active = false;
@@ -107,42 +108,57 @@
 
         return { toast, bar };
     }
+	
+	
+	function showNext() {
+		if (!queue.length || active) return;
 
-    function showNext() {
-        if (!queue.length || active) return;
+		active = true;
 
-        active = true;
+		const { type, message } = queue.pop();
+		const { toast, bar } = createToast(type, message);
 
-        const { type, message } = queue.shift();
-        const { toast, bar } = createToast(type, message);
+		// Começa fora da tela (à direita)
+		toast.classList.remove("toast-show", "toast-hide");
+		toast.style.transform = "translateX(100%)";
+		toast.style.opacity = "0";
 
-        toast.style.transform = "translateX(100%)";
-        toast.style.opacity = "0";
+		// Entrada (para o centro)
+		requestAnimationFrame(() => {
+			// força reflow
+			void toast.offsetWidth;
 
-        requestAnimationFrame(() => {
-            void toast.offsetWidth;
-            toast.classList.add("toast-show");
-            bar.style.transition = "transform 5s linear";
-            bar.style.transform = "scaleX(0)";
-        });
+			toast.classList.add("toast-show");
 
-        setTimeout(() => {
-            toast.classList.remove("toast-show");
-            toast.classList.add("toast-hide");
-            setTimeout(() => {
-                toast.remove();
-                active = false;
-                setTimeout(showNext, 400);
-            }, 450);
-        }, 5200);
-    }
+			// anima barra
+			bar.style.transition = "transform 5s linear";
+			bar.style.transform = "scaleX(0)";
+		});
+
+		// Saída (para a esquerda)
+		setTimeout(() => {
+			toast.classList.remove("toast-show");
+			toast.classList.add("toast-hide");  // Sai para a esquerda (CSS)
+
+			setTimeout(() => {
+				toast.remove();
+				active = false;
+				setTimeout(showNext, 400);
+			}, 450);
+
+		}, 5200);
+	}
 
     /* ------------------------------
-       5 — Objeto Global MS
+       5 — Objeto global MS
        ------------------------------ */
     window.MS = {
         init(messages = []) {
-            messages.forEach(msg => queue.push(msg));
+            messages.forEach(msg => {
+                if (!queue.some(m => m.type === msg.type && m.message === msg.message)) {
+                    queue.push({ type: msg.type, message: msg.message });
+                }
+            });
             showNext();
         },
         show(type, message) {
@@ -152,62 +168,7 @@
     };
 
     /* ------------------------------
-       6 — AJAX HÍBRIDO — VERSÃO FINAL
-       ------------------------------ */
-    document.addEventListener("DOMContentLoaded", () => {
-
-        const ajaxForms = document.querySelectorAll("form[data-ms='ajax']");
-
-        ajaxForms.forEach(form => {
-
-            form.addEventListener("submit", async (ev) => {
-                ev.preventDefault();
-
-                const isMultipart =
-					form.enctype === "multipart/form-data" ||
-					form.querySelector("input[type='file']") !== null;
-
-                const payload = isMultipart
-                    ? new FormData(form)
-                    : new URLSearchParams(new FormData(form));
-
-                const submitBtn = form.querySelector("[type=submit]");
-                if (submitBtn) submitBtn.disabled = true;
-
-                try {
-                    const response = await fetch(form.action, {
-                        method: form.method || "POST",
-                        headers: {
-                            "X-MS-AJAX": "1" //,
-                            //"Accept": "application/json",
-                            //...(isMultipart ? {} : { "Content-Type": "application/x-www-form-urlencoded" })
-                        },
-                        body: payload
-                    });
-
-                    const json = await response.json();
-
-                    if (Array.isArray(json.messages)) {
-                        json.messages.forEach(m => MS.show(m.type, m.message));
-                    }
-
-                    if (json.redirect) {
-                        window.location.href = json.redirect;
-                        return;
-                    }
-
-                } catch (e) {
-                    MS.show("error", "Falha inesperada no envio AJAX");
-                }
-
-                if (submitBtn) submitBtn.disabled = false;
-            });
-        });
-
-    });
-
-    /* ------------------------------
-       7 — Inicialização Flash
+       6 — Auto-inicialização
        ------------------------------ */
     document.addEventListener("DOMContentLoaded", () => {
         if (window._ms_messages) {

@@ -1,174 +1,247 @@
-# MS Framework
+MS Framework
 
-**Micro-serviço de mensagens com Flash + AJAX | Toasts modernos e simples para qualquer sistema PHP.**
+Micro-serviço de mensagens para PHP — Flash Messages, suporte total a AJAX e toasts modernos no front-end.
 
-O **MS Framework** fornece uma API extremamente simples para criar, exibir e gerenciar mensagens de sistema (sucesso, erro, aviso, info). Funciona com **Flash Messages (backend)** e com chamadas diretas no **Front-End (AJAX)**.
-Ideal para aplicações MVC, microframeworks ou projetos customizados.
+O MS Framework é uma solução leve, independente, sem dependências externas, projetada para qualquer aplicação PHP (MVC, microframeworks ou projetos customizados). Ele simplifica a criação, persistência e exibição de mensagens de sistema (sucesso, erro, aviso e info), funcionando tanto no backend (Flash) quanto no frontend (AJAX) de forma automática.
 
----
+⭐ Recursos Principais
 
-## 📦 Instalação via Composer
+API extremamente simples: ms()->success("...")
 
-```bash
+Flash Messages automáticas com persistência entre requisições
+
+Renderização em JSON para integração com fetch/AJAX
+
+Toasts modernos, leves e responsivos (CSS/JS nativos do pacote)
+
+Sem dependências externas
+
+Rápido e compatível com qualquer arquitetura PHP
+
+Suporte opcional a persistência de formulários
+
+📦 Instalação
 composer require gdoisdev/ms-framework
-```
 
----
 
-## 🧩 Autoload (PSR-4)
+O autoload segue PSR-4 e expõe o namespace:
 
-O pacote expõe o namespace:
-
-```
 GdoisDev\MSFramework\
-```
 
-E registra automaticamente os helpers do arquivo `src/helpers.php`.
 
----
+Os helpers do arquivo src/helpers.php são registrados automaticamente.
 
-## 🚀 Uso Básico no Backend
-
-### ➤ Criar mensagem flash
-
-```php
-ms()->success("Operação realizada com sucesso!");
-ms()->error("Falha ao processar requisição.");
-ms()->warning("Verifique os dados informados.");
+🧪 Tipos de Mensagem Disponíveis
+Tipo	Descrição
+success	Para ações concluídas com sucesso
+error	Para ações concluídas com erro ou falha
+warning	Para ações que requerem atenção
+info	Para ações informativas
+🚀 Uso Básico no Backend
+Criar mensagens
+ms()->success("Operação concluída!");
+ms()->error("Algo deu errado.");
+ms()->warning("Atenção ao preencher os dados.");
 ms()->info("Tudo certo por aqui.");
-```
 
-### ➤ Redirecionar com mensagem
-
-```php
+Redirecionar com mensagem
 ms()->success("Atualizado!")->redirect("/dashboard");
-```
 
-### ➤ Persistir formulários (opcional)
+Persistir formulários (opcional)
+ms()->persistForm(true)->warning("Preencha os campos obrigatórios.");
 
-```php
-ms()->persistForm(true)->warning("Preencha os campos obrigatórios");
-```
+🔄 Métodos de Resposta do MS Framework
 
----
+O MS Framework oferece dois métodos essenciais para controlar o fluxo de saída do backend:
 
-## 🎨 Exibir mensagens no Front-End (Flash + AJAX)
+respond() → usado para requisições AJAX
 
-O **MS Framework** funciona renderizando um JSON com as mensagens do backend:
+redirect() → usado para requisições tradicionais (HTTP GET/POST)
 
-```php
+⚡ respond()
+
+Usado para requisições AJAX.
+
+Detecta se a requisição é AJAX pelo header "X-MS-AJAX" ou pelo tipo de conteúdo.
+
+Compila todas as mensagens criadas via ms()->....
+
+Retorna JSON válido contendo mensagens, redirecionamento e persistência.
+
+Encerra o fluxo da aplicação automaticamente.
+
+Exemplo JSON retornado:
+
+{
+    "messages": [
+        {
+            "type": "success",
+            "message": "Salvo com sucesso!"
+        }
+    ],
+    "redirect": null,
+    "persist": true
+}
+
+
+Uso:
+
+ms()->success("OK AJAX")->respond();
+
+
+Ideal para:
+
+Endpoints /api/*
+
+Fetch/AJAX
+
+Formulários com data-ms="ajax"
+
+🔁 redirect(string $url)
+
+Usado em requisições tradicionais.
+
+Salva mensagens na sessão (Flash Messages).
+
+Envia header Location: /rota e finaliza a execução.
+
+Exemplo:
+
+ms()->success("Atualizado!")->redirect("/dashboard");
+
+
+Como funciona internamente:
+
+Armazena mensagens temporariamente em $_SESSION['ms_flash'].
+
+Na próxima requisição, o front-end injeta automaticamente window._ms_messages no layout.
+
+📝 Uso de respond() e redirect() com formulários
+
+O comportamento difere dependendo se o formulário é AJAX ou submit tradicional.
+
+1️⃣ Formulário com data-ms="ajax" (AJAX)
+Código	Comportamento
+ms()->message->respond()	✅ Exibe toast no front-end
+✅ Mantém persistência do formulário
+✅ Redirecionamento via JSON/JS se definido
+ms()->message->respond()->redirect("rota")	⚠ redirect() é ignorado em AJAX; respond() controla tudo
+
+Resumo: Para formulários AJAX, apenas respond() é suficiente.
+
+2️⃣ Formulário sem data-ms="ajax" (submit tradicional)
+Código	Comportamento
+ms()->message->respond()	❌ Redireciona para página em branco (não recomendado)
+❌ Não mantém persistência
+ms()->message->redirect("rota")	✅ Redireciona para a rota
+✅ Exibe a mensagem
+❌ Não mantém persistência do formulário
+ms()->message->respond()->redirect("rota")	✅ Redireciona corretamente
+✅ Mensagem exibida
+❌ Persistência não ocorre
+
+Resumo: Para formulários tradicionais, sempre use redirect() para controlar a rota; respond() sozinho não funciona.
+
+⚡ Dica
+
+Persistência do formulário funciona apenas em requisições AJAX com respond().
+
+Mensagens em submit tradicional dependem da sessão e do redirect().
+
+📘 Exemplos Práticos
+1️⃣ Controller com AJAX
+if ($ok) {
+    ms()->success("Salvo via AJAX!");
+} else {
+    ms()->error("Erro ao salvar.");
+}
+
+return ms()->respond();
+
+2️⃣ Controller tradicional
+ms()->warning("Você será redirecionado.");
+return ms()->redirect("/home");
+
+3️⃣ Persistindo formulário + AJAX
+ms()->persistForm(true)->error("Corrija os campos.");
+return ms()->respond();
+
+🎨 Exibindo mensagens no Front-End
+
+O backend injeta mensagens no layout usando:
+
 <?= ms()->flash()->render(); ?>
-```
 
-E o JavaScript exibe como toasts usando:
 
-```js
+E o JS exibe automaticamente com:
+
 MS.init(window._ms_messages);
-```
 
----
+🔧 Como incluir no Layout
+1️⃣ CSS no <head>
+<link rel="stylesheet" href="/ms-framework/src/Front/ms.css">
 
-# 🔧 Como incluir o MS Framework na sua View / Layout
-
-Para que os toasts apareçam automaticamente, basta incluir **um CSS**, **um JS** e **o render do Flash**. A ordem é importante!
-
-## 1️⃣ Inclua o CSS no `<head>`
-
-```html
-<link rel="stylesheet" href="/ms-framework/src/Front/ms.css"/>
-```
-
-Esse CSS controla o estilo dos toasts e do container `#message-container`.
-
----
-
-## 2️⃣ Inclua o JS e o Flash no final do `<body>`
-
-```html
+2️⃣ JS + Flash no final do <body>
 <script src="/ms-framework/src/Front/ms.js"></script>
-
-<!-- Injeta as mensagens geradas no backend -->
 <?= ms()->flash()->render(); ?>
-```
 
-### ✔ Ordem correta (muito importante):
 
-1. **Carrega `ms.js`** → cria `window.MS`
-2. **Executa `ms()->flash()->render()`** → cria `window._ms_messages`
-3. O JS automaticamente executa:
+Ordem final (muito importante):
 
-```js
-MS.init(window._ms_messages);
-```
+Carrega ms.js
 
-E os toasts aparecem.
+PHP injeta window._ms_messages
 
----
+JS inicializa automaticamente: MS.init(window._ms_messages)
 
-# 🧱 Modelo Completo de Layout
-
-```html
+🧱 Layout Completo de Exemplo
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
-    
-    <!-- MS Framework CSS -->
-    <link rel="stylesheet" href="/ms-framework/src/Front/ms.css"/>
+    <link rel="stylesheet" href="/ms-framework/src/Front/ms.css">
 </head>
-
 <body>
 
-    <!-- conteúdo -->
     <?= $this->section('content') ?>
 
-    <!-- MS Framework JS -->
     <script src="/ms-framework/src/Front/ms.js"></script>
-
-    <!-- Injeta as mensagens do backend -->
     <?= ms()->flash()->render(); ?>
 
 </body>
 </html>
-```
 
----
+⚡ Uso no Front-End (AJAX)
+Mostrar toast manualmente
+MS.show("success", "Mensagem via JavaScript!");
 
-# ⚡ Usando o Framework no Front-End (AJAX)
-
-Você pode exibir toasts manualmente:
-
-```js
-MS.show("success", "Mensagem gerada pelo JavaScript!");
-```
-
-Ou atualizar mensagens após requisições AJAX:
-
-```js
+Reagir a uma requisição AJAX
 fetch("/api/save")
     .then(r => r.json())
-    .then(data => {
-        MS.init(data.messages); // já no formato do backend
-    });
-```
+    .then(data => MS.init(data.messages));
 
----
+📡 Exemplo completo: Backend → AJAX → Frontend
 
-# 🧪 Tipos de Mensagem
+Backend (/api/save)
 
-| Tipo      | Descrição                       |
-| --------- | ------------------------------- |
-| `success` | Ação concluída com sucesso      |
-| `error`   | Problema ou exceção             |
-| `warning` | Atenção, algo pode estar errado |
-| `info`    | Apenas informação               |
+if ($ok) {
+    ms()->success("Salvo com sucesso!");
+} else {
+    ms()->error("Não foi possível salvar.");
+}
 
----
+echo json_encode([
+    "messages" => ms()->flash()->get(),
+]);
 
-# 📁 Estrutura do Pacote
 
-```
+Frontend
+
+fetch("/api/save", { method: "POST" })
+    .then(r => r.json())
+    .then(data => MS.init(data.messages));
+
+📁 Estrutura do Pacote
 src/
   Core/
   Front/
@@ -179,20 +252,11 @@ src/
   helpers.php
 composer.json
 README.md
-```
 
----
+🔖 Versionamento
 
-# 🔖 Versionamento
+Versão publicada: v1.0.0
 
-Versão inicial publicada:
+🧰 Licença
 
-```
-v1.0.0
-```
-
----
-
-# 🧰 Licença
-
-Licença **MIT** – livre para uso comercial e pessoal.
+Licença MIT – livre para uso comercial e pessoal.

@@ -1,0 +1,60 @@
+/* ======================================================
+   MS Framework - Tema Padrão (v1.0.8)
+   Criado por Geovane Gomes em 28Nov25
+   ====================================================== */
+
+:root {
+    /* ===========================
+       PALETA PRINCIPAL
+       =========================== */
+    --toast-type-success: #38c172;
+    --toast-fade-success: rgba(56, 193, 114, 0.35);
+    --toast-text-success: #196c2c;
+
+    --toast-type-error: #e4606d;
+    --toast-fade-error: rgba(228, 96, 109, 0.35);
+    --toast-text-error: #a71d2a;
+
+    --toast-type-warning: #ffc107;
+    --toast-fade-warning: rgba(255, 193, 7, 0.40);
+    --toast-text-warning: #333300;
+
+    --toast-type-info: #17a2b8;
+    --toast-fade-info: rgba(23, 162, 184, 0.35);
+    --toast-text-info: #0f4c57;
+
+    /* ===========================
+       ESPAÇAMENTO FLUIDO (clamp)
+       =========================== */
+    --space-5: clamp(0.20rem, 0.40vw, 0.35rem);
+    --space-10: clamp(0.35rem, 0.60vw, 0.65rem);
+    --space-15: clamp(0.60rem, 1.00vw, 0.90rem);
+    --space-20: clamp(0.90rem, 1.40vw, 1.30rem);
+    --space-30: clamp(1.20rem, 2.00vw, 1.90rem);
+    --space-45: clamp(2.00rem, 3.00vw, 3.00rem);
+
+    /* ===========================
+       FONTES
+       =========================== */
+    --font-normal-em: clamp(0.90em, 1vw, 1em);
+    --weight-medium: 500;
+
+    /* ===========================
+       RADII
+       =========================== */
+    --radius-small: 4px;
+    --radius-regular: 6px;
+    --radius-medium: 10px;
+    --radius-large: 14px;
+
+    /* ===========================
+       LAYOUT
+       =========================== */
+    --toast-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+    --toast-bg-gradient: linear-gradient(
+        180deg,
+        rgba(235, 242, 255, 0.12),
+        rgba(220, 230, 250, 0.06)
+    );
+    --toast-blur: blur(18px);
+}
