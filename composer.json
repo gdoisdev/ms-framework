@@ -16,10 +16,18 @@
     },
     "authors": [
         {
-            "name": "Geovame G. Silva",
+            "name": "Geovane G. Silva",
             "email": "geovanegdois@gmail.com"
         }
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "GdoisDev\\MSFramework\\Core\\ComposerScripts::copyAssets"
+        ],
+        "post-update-cmd": [
+            "GdoisDev\\MSFramework\\Core\\ComposerScripts::copyAssets"
+        ]
+    }
 }
 
 
