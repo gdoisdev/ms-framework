@@ -1,11 +1,7 @@
 <?php
-
-
-/**
- * MS Framework - Core Manager (Versão Final)
- * Por: Geovane Gomes
- * Revisado em: 02 Dez 2025
- */
+# ===============================
+# 2. MS.php — v1.0.12
+# ===============================
 
 namespace GdoisDev\MSFramework\Core;
 
@@ -17,6 +13,7 @@ class MS
     private array $messages = [];
     private ?string $redirectUrl = null;
     private ?Flash $flash = null;
+    private ?int $delay = null;
 
     public function __construct()
     {
@@ -26,8 +23,14 @@ class MS
     }
 
     /**
-     * Instância do gerenciador Flash
+     * Define o delay em milissegundos antes do redirecionamento.
      */
+    public function delay(int $milliseconds): self
+    {
+        $this->delay = $milliseconds;
+        return $this;
+    }
+
     public function flash(): Flash
     {
         if (!$this->flash) {
@@ -36,9 +39,6 @@ class MS
         return $this->flash;
     }
 
-    /**
-     * Atalhos de mensagem
-     */
     public function success(string $text): self
     {
         $this->messages[] = ['type' => 'success', 'message' => $text];
@@ -64,81 +64,82 @@ class MS
     }
 
     /**
-     * Envia as mensagens para a sessão (flash) para uso posterior
-     * mas NÃO finaliza a requisição.
+     * API nova:
+     * respondTo("url")
+     * respondTo()->redirect("url")
      */
-	 public function respond(): self
-	{
-		// Se for AJAX → responder JSON e encerrar
-		if (!empty($_SERVER['HTTP_X_MS_AJAX'])) {
-
-			$response = [
-				"messages" => $this->messages,
-				"redirect" => $this->redirectUrl
-			];
-
-			header("Content-Type: application/json");
-			echo json_encode($response);
-			exit; // <-- ESSENCIAL
-		}
-
-		// Se NÃO for AJAX → usar sessão (flash)
-		foreach ($this->messages as $m) {
-			SessionMessage::push($m['type'], $m['message']);
-		}
-
-		return $this;
-	}
+    public function respondTo(?string $url = null): self
+    {
+        if ($url) {
+            $this->redirectUrl = $url;
+        }
+        return $this;
+    }
 
     /**
-     * Define URL de redirecionamento e finaliza requisição.
-     * AJAX → JSON
-     * Normal → Location Header
+     * Resposta padronizada
+     */
+    public function respond(): self
+    {
+        if ($this->isAjax()) {
+
+            header("Content-Type: application/json; charset=UTF-8");
+
+            echo json_encode([
+                "messages" => $this->messages,
+                "redirect" => $this->redirectUrl,
+                "delay"    => $this->delay
+            ]);
+
+            exit;
+        }
+
+        // Fluxo normal: grava mensagens
+        foreach ($this->messages as $m) {
+            SessionMessage::push($m['type'], $m['message']);
+        }
+
+        // Redirecionar normalmente
+        if ($this->redirectUrl) {
+
+            if ($this->delay) {
+                echo "<script>
+                        setTimeout(function() {
+                            window.location.href = '{$this->redirectUrl}';
+                        }, {$this->delay});
+                      </script>";
+                exit;
+            }
+
+            header("Location: {$this->redirectUrl}");
+            exit;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Redirecionamento explícito
      */
     public function redirect(string $url)
     {
         $this->redirectUrl = $url;
-
-        // É AJAX (MS + XHR)
-        if ($this->isAjax()) {
-            header("Content-Type: application/json; charset=UTF-8");
-            echo json_encode([
-                "redirect" => $url,
-                "messages" => $this->messages
-            ]);
-            exit;
-        }
-
-        // Fluxo normal (não AJAX)
-        header("Location: {$url}");
-        exit;
+        return $this->respond();
     }
 
-    /**
-     * Retorna valor antigo do formulário
-     */
     public function old(string $field, $default = null)
     {
         return SessionMessage::getOldInput()[$field] ?? $default;
     }
 
-    /**
-     * Detecta AJAX, MS-Request ou Fetch
-     */
     private function isAjax(): bool
     {
         return (
-            (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
-            ||
-            (!empty($_SERVER['HTTP_MS_REQUEST']) &&
-                $_SERVER['HTTP_MS_REQUEST'] === '1')
+            isset($_SERVER['HTTP_X_MS_REQUEST']) &&
+            $_SERVER['HTTP_X_MS_REQUEST'] === '1'
         );
     }
 
-    /**
-     * Publica assets do framework
-     */
     public static function publishAssets()
     {
         $source = dirname(__DIR__) . "/Front";
@@ -154,3 +155,169 @@ class MS
         }
     }
 }
+
+
+
+// namespace GdoisDev\MSFramework\Core;
+
+// use GdoisDev\MSFramework\Core\SessionMessage;
+// use GdoisDev\MSFramework\Flash\Flash;
+
+// class MS
+// {
+    // private array $messages = [];
+    // private ?string $redirectUrl = null;
+    // private ?Flash $flash = null;
+	// private ?int $delay = null;
+
+    // public function __construct()
+    // {
+        // if (session_status() !== PHP_SESSION_ACTIVE) {
+            // session_start();
+        // }
+    // }
+	
+	// /**
+	 // * Define o delay em milissegundos antes do redirecionamento.
+	 // *
+	 // * @param int $milliseconds
+	 // * @return $this
+	 // */
+	// public function delay(int $milliseconds): self
+	// {
+		// $this->delay = $milliseconds;
+		// return $this;
+	// }
+
+    // public function flash(): Flash
+    // {
+        // if (!$this->flash) {
+            // $this->flash = new Flash();
+        // }
+        // return $this->flash;
+    // }
+
+    // public function success(string $text): self
+    // {
+        // $this->messages[] = ['type' => 'success', 'message' => $text];
+        // return $this;
+    // }
+
+    // public function error(string $text): self
+    // {
+        // $this->messages[] = ['type' => 'error', 'message' => $text];
+        // return $this;
+    // }
+
+    // public function warning(string $text): self
+    // {
+        // $this->messages[] = ['type' => 'warning', 'message' => $text];
+        // return $this;
+    // }
+
+    // public function info(string $text): self
+    // {
+        // $this->messages[] = ['type' => 'info', 'message' => $text];
+        // return $this;
+    // }
+
+    // /**
+     // * API nova:
+     // * respondTo("url")
+     // * respondTo()->redirect("url")
+     // */
+    // public function respondTo(?string $url = null): self
+    // {
+        // if ($url) {
+            // $this->redirectUrl = $url;
+        // }
+        // return $this;
+    // }
+
+    // /**
+     // * Finaliza resposta AJAX ou registra mensagens na sessão
+     // */
+    // public function respond(): self
+    // {
+        // if ($this->isAjax()) {
+
+            ////Retornar JSON padronizado
+            // header("Content-Type: application/json; charset=UTF-8");
+
+            // echo json_encode([
+                // "messages" => $this->messages,
+                // "redirect" => $this->redirectUrl
+            // ]);
+
+            // exit;
+        // }
+
+        ////Fluxo normal: salva mensagens
+        // foreach ($this->messages as $m) {
+            // SessionMessage::push($m['type'], $m['message']);
+        // }
+
+        ////Redirecionamento opcional
+        // if ($this->redirectUrl) {
+            // header("Location: {$this->redirectUrl}");
+            // exit;
+        // }
+
+        // return $this;
+    // }
+
+    // /**
+     // * Redirecionamento explícito
+     // */
+    // public function redirect(string $url)
+    // {
+        // $this->redirectUrl = $url;
+
+        // if ($this->isAjax()) {
+            // header("Content-Type: application/json; charset=UTF-8");
+
+            // echo json_encode([
+                // "redirect" => $url,
+                // "messages" => $this->messages
+            // ]);
+
+            // exit;
+        // }
+
+        ////Não-AJAX
+        // foreach ($this->messages as $m) {
+            // SessionMessage::push($m['type'], $m['message']);
+        // }
+
+        // header("Location: {$url}");
+        // exit;
+    // }
+
+    // public function old(string $field, $default = null)
+    // {
+        // return SessionMessage::getOldInput()[$field] ?? $default;
+    // }
+
+    // private function isAjax(): bool
+    // {
+        // return (
+            // isset($_SERVER['HTTP_X_MS_REQUEST']) &&
+            // $_SERVER['HTTP_X_MS_REQUEST'] === '1'
+        // );
+    // }
+
+    // public static function publishAssets()
+    // {
+        // $source = dirname(__DIR__) . "/Front";
+        // $target = $_SERVER['DOCUMENT_ROOT'] . "/ms-framework";
+
+        // if (!is_dir($target)) {
+            // mkdir($target, 0777, true);
+        // }
+
+        // foreach (glob($source . "/*") as $file) {
+            // $dest = $target . "/" . basename($file);
+            // copy($file, $dest);
+        // }
+    // }
+// }

@@ -1,6 +1,6 @@
-/** MS Framework - Toast Flash 1.0
- *  by Geovane Gomes
- *  Leve • Sem dependências • Plug-and-play
+/**
+ * MS Framework - AJAX + Toast Unificado
+ * by Geovane Gomes & ChatGPT
  */
 
 (function () {
@@ -8,10 +8,10 @@
     /* ------------------------------
        1 — Carrega CSS automaticamente
        ------------------------------ */
-	const cssPath = "/ms-framework/ms.css";   
-    //const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
-    const existingLink = document.querySelector(`link[href="${cssPath}"]`);
+   // const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
+   const cssPath = "/ms-framework/ms.css";
 
+    const existingLink = document.querySelector(`link[href="${cssPath}"]`);
     if (!existingLink) {
         const link = document.createElement("link");
         link.rel = "stylesheet";
@@ -20,7 +20,7 @@
     }
 
     /* ------------------------------
-       2 — Cria o container se não existir
+       2 — Container de mensagens
        ------------------------------ */
     const containerId = "message-container";
 
@@ -40,7 +40,7 @@
     }
 
     /* ------------------------------
-       3 — Ícones Inline SVG (herda cor)
+       3 — Ícones
        ------------------------------ */
     const svgIcons = {
         success: `
@@ -74,7 +74,7 @@
     };
 
     /* ------------------------------
-       4 — Sistema de fila sofisticado
+       4 — Toast + Fila
        ------------------------------ */
     let queue = [];
     let active = false;
@@ -108,57 +108,42 @@
 
         return { toast, bar };
     }
-	
-	
-	function showNext() {
-		if (!queue.length || active) return;
 
-		active = true;
+    function showNext() {
+        if (!queue.length || active) return;
 
-		const { type, message } = queue.pop();
-		const { toast, bar } = createToast(type, message);
+        active = true;
 
-		// Começa fora da tela (à direita)
-		toast.classList.remove("toast-show", "toast-hide");
-		toast.style.transform = "translateX(100%)";
-		toast.style.opacity = "0";
+        const { type, message } = queue.shift();
+        const { toast, bar } = createToast(type, message);
 
-		// Entrada (para o centro)
-		requestAnimationFrame(() => {
-			// força reflow
-			void toast.offsetWidth;
+        toast.style.transform = "translateX(100%)";
+        toast.style.opacity = "0";
 
-			toast.classList.add("toast-show");
+        requestAnimationFrame(() => {
+            void toast.offsetWidth;
+            toast.classList.add("toast-show");
+            bar.style.transition = "transform 5s linear";
+            bar.style.transform = "scaleX(0)";
+        });
 
-			// anima barra
-			bar.style.transition = "transform 5s linear";
-			bar.style.transform = "scaleX(0)";
-		});
-
-		// Saída (para a esquerda)
-		setTimeout(() => {
-			toast.classList.remove("toast-show");
-			toast.classList.add("toast-hide");  // Sai para a esquerda (CSS)
-
-			setTimeout(() => {
-				toast.remove();
-				active = false;
-				setTimeout(showNext, 400);
-			}, 450);
-
-		}, 5200);
-	}
+        setTimeout(() => {
+            toast.classList.remove("toast-show");
+            toast.classList.add("toast-hide");
+            setTimeout(() => {
+                toast.remove();
+                active = false;
+                setTimeout(showNext, 400);
+            }, 450);
+        }, 5200);
+    }
 
     /* ------------------------------
-       5 — Objeto global MS
+       5 — Objeto Global MS
        ------------------------------ */
     window.MS = {
         init(messages = []) {
-            messages.forEach(msg => {
-                if (!queue.some(m => m.type === msg.type && m.message === msg.message)) {
-                    queue.push({ type: msg.type, message: msg.message });
-                }
-            });
+            messages.forEach(msg => queue.push(msg));
             showNext();
         },
         show(type, message) {
@@ -168,7 +153,7 @@
     };
 
     /* ------------------------------
-       6 — Auto-inicialização
+       7 — Inicialização Flash
        ------------------------------ */
     document.addEventListener("DOMContentLoaded", () => {
         if (window._ms_messages) {

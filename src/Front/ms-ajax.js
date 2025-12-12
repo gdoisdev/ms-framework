@@ -1,55 +1,59 @@
 /**
- * document.js
- * Extensão AJAX complementar para o MS Framework
- * (Não altera o ms.js — funciona em cima dele)
+ * Extensão AJAX oficial do MS Framework (versão moderna)
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+(function () {
 
-    const forms = document.querySelectorAll("form[data-ms='ajax']");
+    document.addEventListener("submit", function (event) {
+        const form = event.target;
 
-    forms.forEach(form => {
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
+        if (!form.hasAttribute("data-ms")) {
+            return;
+        }
 
-            const submitBtn = form.querySelector("[type=submit]");
-            if (submitBtn) submitBtn.disabled = true;
+        event.preventDefault();
 
-            const action = form.getAttribute("action");
-            const method = (form.getAttribute("method") || "post").toUpperCase();
+        const action = form.getAttribute("action");
+        const method = form.getAttribute("method") || "POST";
+        const formData = new FormData(form);
 
-            const formData = new FormData(form);
+        const submitBtn = form.querySelector("[type=submit]");
+        if (submitBtn) submitBtn.disabled = true;
 
-            try {
-                const response = await fetch(action, {
-                    method,
-                    body: formData,
-                    headers: {
-                        "X-MS-Ajax": "1"
-                    }
-                });
+        fetch(action, {
+            method: method,
+            body: formData,
+            headers: {
+                "X-MS-Request": "1"
+            }
+        })
+            .then(async response => {
+                const json = await response.json();
 
-                const data = await response.json();
-
-                // Exibe mensagens vindas do backend
-                if (data.messages && Array.isArray(data.messages)) {
-                    data.messages.forEach(msg => {
-                        MS.show(msg.type, msg.message);
+                // Exibir mensagens (fila automática do MS)
+                if (Array.isArray(json.messages)) {
+                    json.messages.forEach(msg => {
+                        MS.show(msg.type || "info", msg.message || "");
                     });
                 }
 
-                // Redirecionamento mantendo persistência
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                    return;
+                // Redirect com delay
+                if (json.redirect) {
+                    const delay = json.delay ? parseInt(json.delay) : 0;
+
+                    setTimeout(() => {
+                        window.location.href = json.redirect;
+                    }, delay);
                 }
 
-            } catch (err) {
-                MS.show("error", "Erro inesperado no envio AJAX");
-            }
+            })
+            .catch(() => {
+                MS.show("error", "Falha na requisição AJAX do MS Framework");
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
+            });
 
-            if (submitBtn) submitBtn.disabled = false;
-        });
     });
 
-});
+})();

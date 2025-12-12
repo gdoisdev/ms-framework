@@ -8,7 +8,8 @@
     /* ------------------------------
        1 — Carrega CSS automaticamente
        ------------------------------ */
-    const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
+   // const cssPath = "/vendor/gdoisdev/ms-framework/src/Front/ms.css";
+	const cssPath = "/ms-framework/ms.css";
 
     const existingLink = document.querySelector(`link[href="${cssPath}"]`);
     if (!existingLink) {
@@ -150,61 +151,6 @@
             showNext();
         }
     };
-
-    /* ------------------------------
-       6 — AJAX HÍBRIDO — VERSÃO FINAL
-       ------------------------------ */
-    document.addEventListener("DOMContentLoaded", () => {
-
-        const ajaxForms = document.querySelectorAll("form[data-ms='ajax']");
-
-        ajaxForms.forEach(form => {
-
-            form.addEventListener("submit", async (ev) => {
-                ev.preventDefault();
-
-                const isMultipart =
-					form.enctype === "multipart/form-data" ||
-					form.querySelector("input[type='file']") !== null;
-
-                const payload = isMultipart
-                    ? new FormData(form)
-                    : new URLSearchParams(new FormData(form));
-
-                const submitBtn = form.querySelector("[type=submit]");
-                if (submitBtn) submitBtn.disabled = true;
-
-                try {
-                    const response = await fetch(form.action, {
-                        method: form.method || "POST",
-                        headers: {
-                            "X-MS-AJAX": "1" //,
-                            //"Accept": "application/json",
-                            //...(isMultipart ? {} : { "Content-Type": "application/x-www-form-urlencoded" })
-                        },
-                        body: payload
-                    });
-
-                    const json = await response.json();
-
-                    if (Array.isArray(json.messages)) {
-                        json.messages.forEach(m => MS.show(m.type, m.message));
-                    }
-
-                    if (json.redirect) {
-                        window.location.href = json.redirect;
-                        return;
-                    }
-
-                } catch (e) {
-                    MS.show("error", "Falha inesperada no envio AJAX");
-                }
-
-                if (submitBtn) submitBtn.disabled = false;
-            });
-        });
-
-    });
 
     /* ------------------------------
        7 — Inicialização Flash
