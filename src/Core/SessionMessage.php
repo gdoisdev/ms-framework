@@ -6,6 +6,8 @@
  * em: 22 Nov 2025
  */
 
+namespace GdoisDev\MSFramework\Core; 
+
 class SessionMessage
 {
     protected const ROOT      = '__MSF__';
