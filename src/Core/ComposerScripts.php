@@ -1,4 +1,10 @@
 <?php
+/**
+* MS Framework - Message
+* Por: Geovane Gomes 
+* em: 22Nov25 
+*/
+
 namespace GdoisDev\MSFramework\Core;
 
 class ComposerScripts

@@ -3,7 +3,7 @@
 /**
  * MS Framework - Helpers utilitários
  * Por: Geovane Gomes
- * Criado em: 22 Nov 2025
+ * em: 22 Nov 2025
  */
 
 namespace GdoisDev\MSFramework\Core;
