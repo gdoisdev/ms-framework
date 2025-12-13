@@ -1,153 +1,162 @@
-MS-Framework – AJAX Unified Protocol
+# MS Framework — Message System
 
-📌 Overview
+## Visão geral
 
-O MS-Framework – AJAX Unified Protocol padroniza a comunicação entre formulários HTML com data-ms="ajax" e Controllers PHP através de um pipeline robusto com:
+O **MS Framework** é um orquestrador de respostas para aplicações PHP.
+Ele controla **mensagens**, **persistência de dados** e **redirecionamento**, tanto em fluxos **normais** quanto **AJAX**.
 
-Interceptação automática no front-end (ms.js)
+Este documento é **normativo**: define **o que pode**, **o que não pode** e **como usar corretamente**.
 
-Envio de Header personalizado (HTTP_MS_AJAX)
+---
 
-Serialização inteligente de formulários
+## Princípios fundamentais
 
-Resposta JSON padronizada via ms()->respond()
+1. O MS controla o **ciclo de resposta**.
+2. `respond()` **encerra o ciclo**.
+3. AJAX **não redireciona imediatamente**.
+4. Persistência só ocorre quando **explicitamente permitida**.
+5. Ordem dos métodos **importa**.
 
-Toasts, redirecionamento e persistência de campos
+---
 
-📁 Estrutura do Protocolo
-Requisição do Front-end
-<form data-ms="ajax">
+## Tipos de fluxo
 
+### 1. Fluxo normal (PHP)
 
-O ms.js dispara um fetch:
+* Não utiliza `data-ms="ajax"`
+* Redirecionamento ocorre imediatamente
+* Não há resposta JSON
 
-Header: HTTP_MS_AJAX = 1
-Body: FormData()
+**Uso correto:**
 
-📥 Estrutura da resposta do Controller
+```php
+ms()->redirect(url("/ctrl/balancete/rateios/{$data->s}"));
+return;
+```
 
-Retorno padronizado:
+---
 
-{
-    "messages": [
-        { "type": "success", "text": "Operação concluída!" }
-    ],
-    "redirect": "/dashboard",
-    "persist": false
-}
+### 2. Fluxo AJAX com persistência
 
+* Formulário **DEVE** conter `data-ms="ajax"`
+* Mantém dados do formulário
+* Dispara mensagem
+* Não redireciona
 
-Gerado por:
+**Uso correto:**
 
-ms()->success("Operação concluída")->redirect("/dashboard")->respond();
+```php
+ms()->success("Operação realizada com sucesso")
+   ->respond();
+```
 
-🧩 API Completa do MS()
-Método	Tipo	Exemplo
-success()	Mensagem de sucesso	ms()->success("Feito!")
-info()	Informação	ms()->info("Carregando...")
-warning()	Aviso	ms()->warning("Atenção!")
-error()	Erro	ms()->error("Falhou!")
-redirect()	Redirecionamento	ms()->redirect("/login")
-persistForm()	Mantém valores do form	ms()->persistForm()
-respond()	Finaliza resposta JSON	ms()->respond()
-🗂 Exemplo Completo de Controller
-public function register_division(?array $data): void
-{
-    $userName = Auth::user()->firstName();
+---
 
-    if (empty($data)) {
-        ms()->warning("{$userName}, dados insuficientes.")
-            ->redirect(url("/ctrl/back"))
-            ->respond();
-        return;
-    }
+### 3. Fluxo AJAX com redirecionamento pós-mensagem
 
-    // Processamento...
+* Formulário **DEVE** conter `data-ms="ajax"`
+* Não mantém persistência
+* Mensagem é exibida na página atual
+* Redirecionamento ocorre após `delay()`
 
-    ms()->success("Divisão registrada com sucesso!")
-        ->redirect(url("/ctrl/divisions"))
-        ->respond();
-}
+**Uso recomendado:**
 
-🔄 Fluxograma do Protocolo AJAX (ASCII)
-                 [Usuário envia formulário]
-                              |
-                              v
-                    <form data-ms="ajax">
-                              |
-                              v
-             ms.js intercepta o evento de submit
-                              |
-                              v
-              Cria FormData() + Header HTTP_MS_AJAX
-                              |
-                              v
-           fetch() → Controller (processamento PHP)
-                              |
-                              v
-                     ms()->...->respond()
-                              |
-                              v
-                    JSON padronizado retorna
-                              |
-                              v
-    ms.js exibe toasts → aplica redirect → persiste campos
+```php
+ms()->success("Operação realizada com sucesso")
+   ->delay(4000)
+   ->respondTo(url("/destino"))
+   ->respond();
+return;
+```
 
-⚙ Arquitetura Interna (ASCII)
-+------------------------------------------------+
-|                  MS() Class                    |
-+------------------------------------------------+
-| messages[] | redirect | persist | status | ... |
-+------------------------------------------------+
-                    |
-                    v
-             buildPayload(): array
-                    |
-                    v
-             respondTo(): json_encode()
-                    |
-                    v
-             Front-end → ms.js → UI
+---
 
-🧠 Lógica do Front-end (pseudocódigo)
-ao enviar <form data-ms="ajax">:
-    prevenir submit padrão
-    montar FormData()
-    enviar fetch() com HTTP_MS_AJAX
-    aguardar JSON
-    para cada mensagem -> mostrar toast
-    se redirect -> window.location
-    se persist -> restaurar campos
+## Ordem obrigatória dos métodos
 
-🖼 Layout Conceitual (ASCII)
-+------------------------------------------------------+
-|  [✓] Sucesso: Divisão registrada com sucesso!         |
-+------------------------------------------------------+
+A cadeia **DEVE** seguir esta ordem lógica:
 
-+----------------- Formulário de Cadastro -------------+
-| Nome: [________________]                              |
-| Descrição: [______________________________]           |
-|                                                      |
-| [ SALVAR ] [ CANCELAR ]                              |
-+------------------------------------------------------+
+1. Mensagem (`success`, `error`, `info`, etc)
+2. Configurações opcionais (`delay`, `respondTo`, `redirect`)
+3. Finalização (`respond()`)
 
-📦 Instalação (exemplo)
-composer require gdoisdev/ms-framework
+`respond()` **sempre deve ser o último método**.
 
-📎 Import no Front-end
-<script src="/vendor/gdoisdev/ms-framework/src/Front/ms.js"></script>
-<link rel="stylesheet" href="/vendor/gdoisdev/ms-framework/src/Front/ms.css">
+---
 
-🚀 Roadmap
+## Fluxos inválidos (NUNCA FAÇA)
 
-Integração WebSocket (tempo real)
+### ❌ Redirect após respond
 
-Diagrama Mermaid + blocos UML
+```php
+ms()->success("Mensagem")
+   ->respond()
+   ->redirect(url("/destino"));
+```
 
-CLI para scaffolding de controllers AJAX
+Motivo: `respond()` encerra o ciclo. Qualquer método após ele é ignorado.
 
-Suporte a plugins de UI
+---
 
-📄 Licença
+### ❌ respondTo sem respond
 
-MIT License. Livre para uso comercial e opensource.
+```php
+ms()->success("Mensagem")
+   ->respondTo(url("/destino"));
+```
+
+Motivo: `respondTo()` apenas configura destino. Sem `respond()`, não há resposta.
+
+---
+
+### ❌ respondTo vazio isolado
+
+```php
+ms()->success("Mensagem")
+   ->respondTo();
+```
+
+Motivo: AJAX exige resposta final explícita.
+
+---
+
+## Regras específicas do AJAX
+
+* AJAX **sempre retorna JSON**
+* Redirecionamento depende de `delay()`
+* Persistência só ocorre sem `respondTo()`
+* `redirect()` em AJAX **não redireciona imediatamente**
+
+---
+
+## Checklist rápido
+
+Antes de usar o MS, valide:
+
+* [ ] Meu formulário usa `data-ms="ajax"`?
+* [ ] Preciso persistir dados?
+* [ ] Preciso redirecionar?
+* [ ] Usei `delay()` quando necessário?
+* [ ] `respond()` está no final?
+
+---
+
+## Licença
+
+Este projeto é distribuído sob a licença **MIT**.
+
+Você pode usar, copiar, modificar, mesclar, publicar e distribuir este software, desde que o aviso de copyright e a licença sejam mantidos.
+
+Consulte o arquivo `LICENSE` para mais detalhes.
+
+---
+
+## Conclusão
+
+O MS Framework é **opinativo por design**.
+Seguir estas regras garante:
+
+* Comportamento previsível
+* Integração AJAX estável
+* Experiência consistente para o usuário
+
+Desvios dessas regras resultam em falhas de fluxo ou erros de requisição.
