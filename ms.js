@@ -1,6 +1,7 @@
-/** MS Framework - Toast Flash 1.0
- *  by Geovane Gomes
- *  Leve • Sem dependências • Plug-and-play
+ /**
+ * MS Framework - Session Message Storage
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
  */
 
 (function () {

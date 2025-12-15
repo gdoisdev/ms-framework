@@ -1,6 +1,7 @@
-/**
- * MS Framework - AJAX + Toast Unificado
- * by Geovane Gomes & ChatGPT
+ /**
+ * MS Framework - Session Message Storage
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
  */
 
 (function () {

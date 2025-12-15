@@ -1,7 +1,7 @@
 /**
- * document.js
- * Extensão AJAX complementar para o MS Framework
- * (Não altera o ms.js — funciona em cima dele)
+ * MS Framework - ms-ajax - js
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
  */
 
 document.addEventListener("DOMContentLoaded", () => {

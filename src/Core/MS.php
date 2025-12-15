@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * MS Framework - Core Manager (Versão Final)
  * Por: Geovane Gomes

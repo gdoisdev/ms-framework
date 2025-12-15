@@ -1,4 +1,11 @@
 <?php
+
+/**
+ * MS Framework - ComposerScripts
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
+ */
+ 
 namespace GdoisDev\MSFramework\Core;
 
 class ComposerScripts

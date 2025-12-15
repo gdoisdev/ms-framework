@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * MS Framework - MessageFormater
+ * Por: Geovane Gomes
+ * Criado em: 22 Nov 2025
+ */
+ 
 namespace GdoisDev\MSFramework\Render;
 
 use GdoisDev\MSFramework\Core\Message;
