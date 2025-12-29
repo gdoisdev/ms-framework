@@ -1,184 +1,253 @@
-MS Framework — Message System
-Visão geral
+# MS Framework
 
-O MS Framework é um orquestrador de respostas para aplicações PHP.
-Ele controla mensagens, persistência de dados e redirecionamento, tanto em fluxos normais quanto AJAX.
+## Visão Geral
 
-Este documento é normativo: define o que pode, o que não pode e como usar corretamente, com base em testes reais da versão v1.0.08.
+O **MS Framework** é uma biblioteca PHP open source para **mensageria, controle de fluxo e padronização de respostas HTTP e AJAX**, com suporte a mensagens flash e redirecionamentos controlados.
 
-Princípios fundamentais
+Ele foi projetado para aplicações PHP tradicionais que utilizam controllers e renderização de views, mas que também precisam lidar com requisições AJAX de forma previsível e consistente.
 
-O MS controla o ciclo de resposta.
+O MS **não é um framework MVC completo**. Ele atua como uma **camada de serviço** responsável exclusivamente pela orquestração de respostas, mensagens e redirecionamentos, sem interferir na estrutura da aplicação.
 
-respond() encerra o ciclo.
+---
 
-AJAX não redireciona imediatamente.
+## Objetivo do Framework
 
-Persistência só ocorre quando explicitamente permitida.
+O MS Framework resolve um problema recorrente em aplicações PHP:
 
-Ordem dos métodos importa.
+> Como padronizar mensagens, payloads e redirecionamentos sem gerar conflitos entre controllers, views e JavaScript?
 
-Tipos de fluxo
-1. Fluxo normal (PHP)
+Para isso, o MS adota um **modelo explícito de resposta**, onde cada controller deve assumir **um único papel por action**:
 
-Formulário não possui data-ms="ajax"
+* Renderizar uma view
+* **OU** finalizar uma resposta (HTTP ou AJAX)
 
-Redirecionamento ocorre imediatamente
+Essa separação elimina comportamentos ambíguos e torna o fluxo da aplicação previsível.
 
-Não há persistência de dados do formulário
+---
 
-Não há resposta JSON
+## Conceitos Fundamentais
 
-Uso correto:
+### Mensagem
 
-ms()->success("{$userName}, o rateio foi adicionado com sucesso. : )")
-   ->respond()
-   ->redirect(url("/ctrl/balancete/rateios/{$month_year}"));
-return;
+Mensagem é qualquer feedback ao usuário:
 
+* success
+* info
+* error
 
-Observação: Sem redirect() a página resultará em branco. Sem respond(), a mensagem não será exibida.
+Exemplo:
 
-2. Fluxo AJAX com persistência
+```php
+ms()->success("Operação realizada com sucesso!");
+```
 
-Formulário DEVE conter data-ms="ajax"
+---
 
-Mantém dados do formulário
+### Payload
 
-Dispara mensagem
+Payload é o conjunto de dados associado à resposta.
 
-Não redireciona
+* Pode conter dados reais
+* Pode ser explicitamente vazio
 
-Uso correto:
+O MS **exige payload explícito** para redirecionamentos HTTP.
 
-ms()->success("{$userName}, o rateio foi adicionado com sucesso. : )")
+---
+
+### Finalização de resposta
+
+No MS, **nem toda mensagem finaliza uma resposta**.
+
+Existem métodos que apenas emitem mensagens e métodos que encerram o fluxo do controller.
+
+---
+
+## Métodos Principais
+
+### `emit()`
+
+* Emite a mensagem
+* **Não finaliza** a execução do controller
+* Permite continuação do fluxo
+
+Uso típico:
+
+* Controllers que renderizam views
+* Links (`<a>`) com ou sem `data-ms="ajax"`
+
+```php
+ms()->info("Mensagem informativa")->emit();
+```
+
+---
+
+### `respond()`
+
+* Finaliza a resposta
+* Encerra a execução do controller
+* Deve ser usado em actions finais
+
+Uso típico:
+
+* Formulários AJAX
+* Endpoints de API
+
+```php
+ms()->success("Salvo com sucesso")->respond();
+```
+
+---
+
+### `redirect()`
+
+* Redirecionamento HTTP tradicional
+* **Exige payload explícito**
+
+```php
+ms()->success("Atualizado")
+   ->withPayload([])
+   ->redirect(url("/dashboard"));
+```
+
+---
+
+### `ajaxRedirect()`
+
+* Redirecionamento via AJAX
+* Exige finalização com `respond()`
+
+```php
+ms()->error("Erro ao salvar")
+   ->ajaxRedirect(url("/form"))
    ->respond();
+```
 
+---
 
-Observação: Qualquer ação após respond() não será executada. Ideal para inserções com erro ou validação, garantindo que o formulário permaneça com os dados preenchidos.
+### `withPayload()`
 
-3. Fluxo AJAX com redirecionamento pós-mensagem
+Define explicitamente o payload da resposta.
 
-Formulário DEVE conter data-ms="ajax"
+```php
+->withPayload([])
+```
 
-Não mantém persistência de dados
+> ⚠️ Não é gambiarra. É contrato explícito do framework.
 
-Mensagem é exibida na página atual
+---
 
-Redirecionamento ocorre imediatamente após respond() com redirect()
+## Tabela Oficial de Decisão
 
-Uso recomendado:
+| Cenário                       | emit() | respond() | redirect() | ajaxRedirect() | withPayload([]) | Observações                |
+| ----------------------------- | ------ | --------- | ---------- | -------------- | --------------- | -------------------------- |
+| Link normal (`<a>`)           | ✔      | ✖         | ✖          | ✖              | ✖               | Renderiza view             |
+| Link com `data-ms="ajax"`     | ✔      | ✖         | ✖          | ✖              | ✖               | Renderiza view             |
+| Controller que renderiza view | ✔      | ✖         | ✖          | ✖              | ✖               | Nunca finalize             |
+| Formulário AJAX (CRUD)        | ✔      | ✔         | ✖          | ✔              | ✖               | `respond()` obrigatório    |
+| Formulário AJAX sem redirect  | ✔      | ✔         | ✖          | ✖              | ✖               | Apenas feedback            |
+| Formulário NÃO AJAX           | ✔      | ✖         | ✔          | ✖              | ✔               | Payload obrigatório        |
+| Redirect HTTP com mensagem    | ✔      | ✖         | ✔          | ✖              | ✔               | Uso correto                |
+| Redirect AJAX                 | ✔      | ✔         | ✖          | ✔              | ✖               | Fluxo final                |
+| Action finalizadora (API)     | ✖      | ✔         | ✖          | ✖              | ✖               | Sem render                 |
+| Render + redirect             | ❌      | ❌         | ❌          | ❌              | ❌               | Arquiteturalmente inválido |
 
-ms()->success("{$userName}, operação realizada com sucesso")
-   ->respond()
-   ->redirect(url("/destino"));
-return;
+---
 
+## Regras de Ouro
 
-Observação: Diferente de fluxos futuros, nesta versão não há delay programável.
+1. `emit()` **nunca finaliza**
+2. `respond()` **sempre finaliza**
+3. Controller **renderiza OU redireciona**, nunca ambos
+4. `ajaxRedirect()` exige `respond()`
+5. `redirect()` exige payload explícito
+6. `withPayload([])` é contrato, não gambiarra
 
-Ordem obrigatória dos métodos
+---
 
-A cadeia DEVE seguir esta ordem lógica:
+## Exemplos Completos
 
-Mensagem (success, error, info, etc)
+### Controller que renderiza view
 
-Configurações opcionais (redirect, respondTo)
+```php
+public function home(): void
+{
+    ms()->info("Bem-vindo")->emit();
 
-Finalização (respond())
+    echo $this->view->render("home");
+}
+```
 
-respond() sempre deve ser o último método.
+---
 
-Fluxos inválidos (NUNCA FAÇA)
-❌ Redirect após respond
-ms()->success("Mensagem")
-   ->respond()
-   ->redirect(url("/destino"));
+### Formulário AJAX
 
+```php
+if (!$model->save()) {
+    ms()->error("Erro ao salvar")
+       ->ajaxRedirect(url("/form"))
+       ->respond();
+}
 
-Motivo: respond() encerra o ciclo. Qualquer método após ele é ignorado.
+ms()->success("Salvo com sucesso")
+   ->ajaxRedirect(url("/lista"))
+   ->respond();
+```
 
-❌ respondTo sem respond
-ms()->success("Mensagem")
-   ->respondTo(url("/destino"));
+---
 
+### Formulário NÃO AJAX
 
-Motivo: respondTo() apenas configura destino. Sem respond(), não há resposta.
+```php
+ms()->success("Atualizado")
+   ->withPayload([])
+   ->redirect(url("/dashboard"));
+```
 
-❌ respondTo vazio isolado
-ms()->success("Mensagem")
-   ->respondTo();
+---
 
+## Estabilidade do Framework
 
-Motivo: AJAX exige resposta final explícita.
+O MS Framework é considerado **estável e pronto para uso em produção**.
 
-Regras específicas do AJAX
+A estabilidade do MS é garantida por:
 
-AJAX sempre retorna JSON
+* API pequena e coesa
+* Contratos explícitos de uso
+* Separação clara entre emissão de mensagem e finalização de resposta
 
-Redirecionamento depende de redirect() dentro do respond()
+Quando as regras documentadas neste README são respeitadas, o framework apresenta comportamento:
 
-Persistência só ocorre sem respondTo()
+* Determinístico
+* Previsível
+* Consistente entre HTTP e AJAX
 
-respond() é obrigatório para que mensagens sejam exibidas
+---
 
-Checklist rápido
+## Licença
 
-Antes de usar o MS, valide:
+MIT License
 
- Meu formulário usa data-ms="ajax"?
+Copyright (c) 2025
 
- Preciso persistir dados?
+Permissão é concedida, gratuitamente, a qualquer pessoa que obtenha uma cópia deste software e dos arquivos de documentação associados, para lidar no Software sem restrições, incluindo, sem limitação, os direitos de usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou vender cópias do Software.
 
- Preciso redirecionar?
+O software é fornecido "no estado em que se encontra", sem garantia de qualquer tipo.
 
- respond() está no final?
+---
 
-Dicas práticas para CRUD
+## Considerações Finais
 
-Para persistência de dados + mensagem → use data-ms="ajax" + respond()
+O MS Framework adota uma filosofia clara:
 
-Para redirecionamento + mensagem → respond()->redirect(url(...)) em formulário sem ajax
+* Ele **não tenta adivinhar** a intenção do desenvolvedor
+* Ele **exige decisões explícitas**
 
-Para erros de validação → respond() garante que o formulário permaneça intacto
+Essa abordagem reduz efeitos colaterais, facilita depuração e torna o fluxo da aplicação previsível.
 
-Siga sempre a ordem de métodos, evitando comportamentos imprevisíveis
+O custo dessa previsibilidade é a disciplina no uso da API. O benefício é um código mais claro, estável e sustentável a longo prazo.
 
-Instalação via Composer
-composer require gdoisdev/ms-framework
+O MS não tenta adivinhar intenções do desenvolvedor.
 
-Autoload (PSR-4)
-require __DIR__ . '/vendor/autoload.php';
+Ele exige decisões explícitas.
 
-Changelog sugerido (v1.0.08)
-
-Base estável consolidada
-
-Redirecionamento funcionando para fluxos normais e AJAX
-
-Persistência de dados para formulários com data-ms="ajax"
-
-Resposta final garantida via respond()
-
-Fluxos inválidos claramente definidos e bloqueados
-
-Licença
-
-Este projeto é distribuído sob a licença MIT.
-
-Você pode usar, copiar, modificar, mesclar, publicar e distribuir este software, desde que o aviso de copyright e a licença sejam mantidos.
-
-Consulte o arquivo LICENSE para mais detalhes.
-
-Conclusão
-
-O MS Framework é opinativo por design.
-Seguir estas regras garante:
-
-Comportamento previsível
-
-Integração AJAX estável
-
-Experiência consistente para o usuário
-
-Desvios dessas regras resultam em falhas de fluxo ou erros de requisição.
+Esse é o preço — e o benefício — de previsibilidade arquitetural.

@@ -16,12 +16,18 @@ class MS
     private array $messages = [];
     private ?string $redirectUrl = null;
     private ?Flash $flash = null;
+	private bool $emitPending = false;
+	private array $payload = [];
 
     public function __construct()
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
+		
+		if (!isset($_SESSION['ms_payload'])) {
+			$_SESSION['ms_payload'] = [];
+		}
     }
 
     /**
@@ -65,27 +71,48 @@ class MS
     /**
      * Envia as mensagens para a sessão (flash) para uso posterior
      * mas NÃO finaliza a requisição.
+	 * Atualizado em: 17 Dez 25
      */
-	 public function respond(): self
+	public function respond(): void
 	{
-		// Se for AJAX → responder JSON e encerrar
-		if (!empty($_SERVER['HTTP_X_MS_AJAX'])) {
+		if ($this->isAjax()) {
+			$this->emit();
+		}
 
-			$response = [
+		$this->redirect($this->redirectUrl);
+		exit;
+	}	
+	
+	/**
+	 * Registra a mensagem sem finalizar a resposta.
+	 * Deve ser seguido por redirect() ou respond().
+	 * Em: 17 Dez 25
+	 * @return self
+	 */
+	 public function emit(): void
+	{
+		if ($this->isAjax()) {
+			header("Content-Type: application/json; charset=UTF-8");
+			echo json_encode([
 				"messages" => $this->messages,
-				"redirect" => $this->redirectUrl
-			];
-
-			header("Content-Type: application/json");
-			echo json_encode($response);
-			exit; // <-- ESSENCIAL
+				"payload"  => $this->payload
+			]);
+			exit;
 		}
 
-		// Se NÃO for AJAX → usar sessão (flash)
-		foreach ($this->messages as $m) {
-			SessionMessage::push($m['type'], $m['message']);
+		// fluxo normal
+		foreach ($this->messages as $msg) {
+			SessionMessage::push($msg['type'], $msg['message']);
 		}
-
+	}
+	
+	/**
+	 * Registra payload temporário para transporte entre controllers
+	 * Uso explícito e de vida curta
+	 */
+	public function withPayload(array $data): self
+	{
+		$this->payload = $data;
 		return $this;
 	}
 
@@ -93,9 +120,28 @@ class MS
      * Define URL de redirecionamento e finaliza requisição.
      * AJAX → JSON
      * Normal → Location Header
+	 * Atualizado em: 17 Dez 25
      */
     public function redirect(string $url)
     {
+		// Se havia emit pendente, ela agora está resolvida
+		$this->emitPending = false;
+		
+		// Se houver payload, persistir temporariamente
+		if (!empty($this->payload)) {
+
+			$token = bin2hex(random_bytes(16));
+
+			$_SESSION['ms_payload'][$token] = [
+				'data' => $this->payload,
+				'expires' => time() + 120 // 2 minutos
+			];
+
+			//$url .= (str_contains($url, '?') ? '&' : '?') . "ms_ref={$token}";
+			$url .= (strpos($url, '?') !== false ? '&' : '?') . "ms_ref={$token}";
+
+		}
+		
         $this->redirectUrl = $url;
 
         // É AJAX (MS + XHR)
@@ -112,6 +158,67 @@ class MS
         header("Location: {$url}");
         exit;
     }
+	
+	/**
+	 * Recupera payload temporário (uso único)
+	 */
+	public function payload(): array
+	{
+		$token = $_GET['ms_ref'] ?? null;
+
+		if (!$token || empty($_SESSION['ms_payload'][$token])) {
+			return [];
+		}
+
+		$entry = $_SESSION['ms_payload'][$token];
+
+		// Remove imediatamente (uso único)
+		unset($_SESSION['ms_payload'][$token]);
+
+		// Expirado
+		if (($entry['expires'] ?? 0) < time()) {
+			return [];
+		}
+
+		return $entry['data'] ?? [];
+	}
+	
+	public function ajaxRedirect(string $url): void
+	{
+		// resolve emissão pendente
+		$this->emitPending = false;
+
+		echo json_encode([
+			'messages' => $this->messages,
+			'redirect' => $url
+		]);
+
+		exit;
+	}
+	
+	protected function isAjaxRequest(): bool
+	{
+		return isset($_SERVER['HTTP_X_MS_AJAX']);
+	}
+	
+	/**
+     * Proteção contra bug silencioso.
+     * em: 17 Dez 25
+     */
+	public function __destruct()
+	{
+		if ($this->emitPending) {
+			if (defined('MS_DEBUG') && MS_DEBUG === true) {
+				throw new \RuntimeException(
+					"MS: emit() foi chamado sem redirect() ou respond()."
+				);
+			}
+
+			// Produção: log silencioso
+			error_log("MS warning: emit() pendente sem finalização.");
+		}
+	}
+
 
     /**
      * Retorna valor antigo do formulário
@@ -126,13 +233,22 @@ class MS
      */
     private function isAjax(): bool
     {
-        return (
-            (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-                strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
-            ||
-            (!empty($_SERVER['HTTP_MS_REQUEST']) &&
-                $_SERVER['HTTP_MS_REQUEST'] === '1')
-        );
+		 return (
+			(
+			    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+			    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+			)
+			||
+			(
+				isset($_SERVER['HTTP_MS_REQUEST']) &&
+				$_SERVER['HTTP_MS_REQUEST'] === '1'
+			)
+			||
+			(
+				isset($_SERVER['HTTP_X_MS_AJAX']) &&
+				$_SERVER['HTTP_X_MS_AJAX'] === '1'
+			)
+		);
     }
 
     /**
