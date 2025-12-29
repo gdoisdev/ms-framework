@@ -1,6 +1,6 @@
 {
     "name": "gdoisdev/ms-framework",
-    "description": "Micro-framework PHP para mensageria, controle de fluxo e padronização de respostas HTTP e AJAX."
+    "description": "Micro-framework PHP para mensageria, controle de fluxo e padronização de respostas HTTP e AJAX.",
     "type": "library",
     "license": "MIT",
     "autoload": {
