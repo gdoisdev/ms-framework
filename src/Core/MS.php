@@ -250,22 +250,55 @@ class MS
 			)
 		);
     }
+	
+	/* Publica os assets do MS Framework em um diretório público.
+	 * Método idempotente: só copia se não existir.
+	 *
+	 * @param string $publicPath Caminho absoluto do diretório público destino
+	 *
+	 * @throws \RuntimeException
+	 */
+	public function publishAssets(string $publicPath): void
+	{
+		$sourcePath = realpath(__DIR__ . '/../Front');
 
-    /**
-     * Publica assets do framework
-     */
-    public static function publishAssets()
-    {
-        $source = dirname(__DIR__) . "/Front";
-        $target = $_SERVER['DOCUMENT_ROOT'] . "/ms-framework";
+		if ($sourcePath === false) {
+			throw new \RuntimeException('MS: diretório de assets não encontrado.');
+		}
 
-        if (!is_dir($target)) {
-            mkdir($target, 0777, true);
-        }
+		if (!is_dir($publicPath)) {
+			if (!mkdir($publicPath, 0755, true) && !is_dir($publicPath)) {
+				throw new \RuntimeException(
+					"MS: não foi possível criar o diretório público {$publicPath}"
+				);
+			}
+		}
 
-        foreach (glob($source . "/*") as $file) {
-            $dest = $target . "/" . basename($file);
-            copy($file, $dest);
-        }
-    }
+		$files = [
+			'ms.js',
+			'ms-ajax.js',
+			'ms.css',
+			'ms-theme.css'
+		];
+
+		foreach ($files as $file) {
+			$sourceFile = $sourcePath . DIRECTORY_SEPARATOR . $file;
+			$targetFile = $publicPath . DIRECTORY_SEPARATOR . $file;
+
+			if (!file_exists($sourceFile)) {
+				throw new \RuntimeException(
+					"MS: asset {$file} não encontrado em {$sourcePath}"
+				);
+			}
+
+			// Só copia se ainda não existir
+			if (!file_exists($targetFile)) {
+				if (!copy($sourceFile, $targetFile)) {
+					throw new \RuntimeException(
+						"MS: falha ao copiar {$file} para {$publicPath}"
+					);
+				}
+			}
+		}
+	}
 }

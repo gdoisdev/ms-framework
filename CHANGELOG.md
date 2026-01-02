@@ -1,19 +1,18 @@
 # Changelog
 
-## [1.1.0] - 2025-XX-XX
+## v1.1.2 – 2026-01-01
 
 ### Added
-- Documentação completa do modelo de resposta do MS Framework
-- Tabela oficial de decisão para uso de emit, respond, redirect e ajaxRedirect
-- Exemplos práticos para controllers com renderização de view
-- Exemplos para formulários AJAX e não-AJAX
+- Publicação automática de assets via Composer (`post-install` e `post-update`)
+- Diretório público padrão `/ms` criado automaticamente
+- Script `ms-install.php` disponível como binário opcional
 
-### Clarified
-- Uso correto de emit() vs respond()
-- Obrigatoriedade de payload explícito em redirect()
-- Papel do withPayload([]) como contrato de resposta
+### Changed
+- MS Framework não depende mais de helpers, URLs ou contexto HTTP
+- Processo de instalação agora é 100% compatível com CLI e hospedagem compartilhada
 
-### Stability
-- Nenhuma alteração de API
-- Nenhuma quebra de compatibilidade
-- Release focado em clareza e previsibilidade
+### Fixed
+- Falhas em ambientes sem `HTTP_HOST`
+- Erros de execução do Composer em projetos que usam autoload por arquivos
+- Problemas de paths relativos em instalações locais e produção
+

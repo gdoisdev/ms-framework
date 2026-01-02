@@ -5,6 +5,11 @@
  */
 
 (function () {
+	
+	if (window.__MS_READY__) {
+		return;
+	}
+	window.__MS_READY__ = true;
 
     /* ------------------------------
        1 — Container de mensagens

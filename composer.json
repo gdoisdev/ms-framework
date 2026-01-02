@@ -1,36 +1,29 @@
 {
-    "name": "gdoisdev/ms-framework",
-    "description": "Micro-framework PHP para mensageria, controle de fluxo e padronização de respostas HTTP e AJAX.",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "GdoisDev\\MSFramework\\": "src/"
-        },
-        "files": [
-            "src/Helpers/helpers.php"
-        ]
+  "name": "gdoisdev/ms-framework",
+  "description": "Micro-framework PHP para mensageria, controle de fluxo e padronização de respostas HTTP e AJAX.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": ["php", "framework", "messaging", "ajax", "http"],
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "GdoisDev\\MSFramework\\": "src/"
     },
-    "require": {
-        "php": ">=7.4"
-    },
-    "authors": [
-        {
-            "name": "Geovane G. Silva",
-            "email": "geovanegdois@gmail.com"
-        }
-    ],
-    "scripts": {
-        "post-install-cmd": [
-            "GdoisDev\\MSFramework\\Core\\ComposerScripts::copyAssets"
-        ],
-        "post-update-cmd": [
-            "GdoisDev\\MSFramework\\Core\\ComposerScripts::copyAssets"
-        ]
+    "files": [
+      "src/Helpers/helpers.php"
+    ]
+  },
+  "require": {
+    "php": ">=7.4"
+  },
+  "authors": [
+    {
+      "name": "Geovane G. Silva",
+      "email": "geovanegdois@gmail.com"
     }
+  ],
+  "bin": [
+    "bin/ms-install.php"
+  ]
 }
-
-
-
-
-
