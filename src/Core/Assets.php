@@ -37,23 +37,26 @@ final class Assets
     }
 
     private static function resolvePublicPath(): string
-    {
-        if (defined('MS_PUBLIC_PATH')) {
-            return rtrim(MS_PUBLIC_PATH, '/');
-        }
+	{
+		// 1. Projeto definiu explicitamente
+		if (defined('MS_PUBLIC_PATH')) {
+			return rtrim(MS_PUBLIC_PATH, '/');
+		}
 
-        $root = dirname(__DIR__, 3);
+		// 2. DOCUMENT_ROOT (forma correta em runtime HTTP)
+		if (!empty($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'])) {
+			return rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/ms';
+		}
 
-        if (is_dir($root . '/public')) {
-            return $root . '/public/ms';
-        }
+		// 3. Fallback seguro (CLI, testes, edge cases)
+		$cwd = getcwd();
+		if ($cwd && is_dir($cwd)) {
+			return rtrim($cwd, '/') . '/ms';
+		}
 
-        if (is_dir($root . '/www')) {
-            return $root . '/www/ms';
-        }
-
-        return $root . '/ms';
-    }
+		// 4. Último recurso (não ideal, mas seguro)
+		return sys_get_temp_dir() . '/ms';
+	}
 
     private static function alreadyInstalled(string $path): bool
     {
