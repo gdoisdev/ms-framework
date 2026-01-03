@@ -14,7 +14,6 @@ final class Assets
 
     public static function bootstrap(): void
     {
-        // Nunca executar em CLI
         if (PHP_SAPI === 'cli') {
             return;
         }
@@ -43,11 +42,15 @@ final class Assets
 
         $root = dirname(__DIR__, 3);
 
-        return match (true) {
-            is_dir($root . '/public') => $root . '/public/ms',
-            is_dir($root . '/www')    => $root . '/www/ms',
-            default                  => $root . '/ms',
-        };
+        if (is_dir($root . '/public')) {
+            return $root . '/public/ms';
+        }
+
+        if (is_dir($root . '/www')) {
+            return $root . '/www/ms';
+        }
+
+        return $root . '/ms';
     }
 
     private static function alreadyInstalled(string $path): bool
