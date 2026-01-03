@@ -5,8 +5,10 @@ namespace GdoisDev\MSFramework\Core;
 /**
  * Responsável por publicar os assets do MS Framework
  * Executa uma única vez por projeto
+ *
+ * Compatível com PHP 7.4+
  * Por: Geovane Gomes
- * em: 03 Jan 26 
+ * Em: 03 Jan 2026
  */
 final class Assets
 {
