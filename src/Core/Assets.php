@@ -10,16 +10,13 @@ namespace GdoisDev\MSFramework\Core;
  * Por: Geovane Gomes
  * Em: 03 Jan 2026
  */
+
 final class Assets
 {
     private const MARKER = '.ms-assets-installed';
 
     public static function bootstrap(): void
     {
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
-
         try {
             $publicPath = self::resolvePublicPath();
 
@@ -31,32 +28,29 @@ final class Assets
             self::markAsInstalled($publicPath);
 
         } catch (\Throwable $e) {
-            // Assets nunca devem quebrar a aplicação
-            error_log($e->getMessage());
+            error_log('[MS Assets] ' . $e->getMessage());
         }
     }
 
     private static function resolvePublicPath(): string
-	{
-		// 1. Projeto definiu explicitamente
-		if (defined('MS_PUBLIC_PATH')) {
-			return rtrim(MS_PUBLIC_PATH, '/');
-		}
+    {
+        // root do projeto consumidor
+        $root = dirname($_SERVER['SCRIPT_FILENAME']);
 
-		// 2. DOCUMENT_ROOT (forma correta em runtime HTTP)
-		if (!empty($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'])) {
-			return rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/ms';
-		}
+        while ($root !== dirname($root)) {
+            if (is_dir($root . '/public')) {
+                return $root . '/public/ms';
+            }
 
-		// 3. Fallback seguro (CLI, testes, edge cases)
-		$cwd = getcwd();
-		if ($cwd && is_dir($cwd)) {
-			return rtrim($cwd, '/') . '/ms';
-		}
+            if (is_dir($root . '/www')) {
+                return $root . '/www/ms';
+            }
 
-		// 4. Último recurso (não ideal, mas seguro)
-		return sys_get_temp_dir() . '/ms';
-	}
+            $root = dirname($root);
+        }
+
+        return dirname($_SERVER['SCRIPT_FILENAME']) . '/ms';
+    }
 
     private static function alreadyInstalled(string $path): bool
     {
@@ -73,32 +67,29 @@ final class Assets
 
     private static function publish(string $publicPath): void
     {
-        $sourcePath = realpath(__DIR__ . '/../Front');
+        $source = realpath(__DIR__ . '/../Front');
 
-        if (!$sourcePath) {
-            throw new \RuntimeException('MS: diretório de assets não encontrado.');
+        if (!$source) {
+            throw new \RuntimeException('Assets do MS não encontrados.');
         }
 
-        if (!is_dir($publicPath) && !mkdir($publicPath, 0755, true)) {
-            throw new \RuntimeException(
-                "MS: não foi possível criar o diretório {$publicPath}"
-            );
+        if (!is_dir($publicPath)) {
+            mkdir($publicPath, 0755, true);
         }
 
-        $files = [
+        foreach ([
             'ms.js',
             'ms-ajax.js',
             'ms.css',
             'ms-theme.css'
-        ];
+        ] as $file) {
 
-        foreach ($files as $file) {
-            $src = $sourcePath . '/' . $file;
             $dst = $publicPath . '/' . $file;
 
             if (!file_exists($dst)) {
-                copy($src, $dst);
+                copy($source . '/' . $file, $dst);
             }
         }
     }
 }
+

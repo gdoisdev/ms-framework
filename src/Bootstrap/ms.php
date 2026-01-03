@@ -8,4 +8,7 @@ use GdoisDev\MSFramework\Core\Assets;
  * Por: Geovane Gomes
  * Revisado em: 03 Jan 2025
  */
-Assets::bootstrap();
+
+if (PHP_SAPI !== 'cli') {
+    Assets::bootstrap();
+}
