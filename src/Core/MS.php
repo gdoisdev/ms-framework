@@ -8,21 +8,14 @@
 
 namespace GdoisDev\MSFramework\Core;
 
-use GdoisDev\MSFramework\Core\SessionMessage;
 use GdoisDev\MSFramework\Flash\Flash;
 
 class MS
 {
     private array $messages = [];
-    private ?string $redirectUrl = null;
     private ?Flash $flash = null;
     private bool $emitPending = false;
     private array $payload = [];
-
-    /** 
-     * Garante que os assets sejam publicados apenas uma vez por request 
-     */
-    private static bool $assetsPublished = false;
 
     public function __construct()
     {
@@ -31,22 +24,16 @@ class MS
         }
 
         $_SESSION['ms_payload'] ??= [];
-
-        $this->autoPublishAssets();
     }
 
-    /* =========================================================
-     * Flash
-     * ======================================================= */
+    /* ================= Flash ================= */
 
     public function flash(): Flash
     {
         return $this->flash ??= new Flash();
     }
 
-    /* =========================================================
-     * Mensagens
-     * ======================================================= */
+    /* ================= Mensagens ================= */
 
     public function success(string $text): self
     {
@@ -72,9 +59,7 @@ class MS
         return $this;
     }
 
-    /* =========================================================
-     * Resposta
-     * ======================================================= */
+    /* ================= Resposta ================= */
 
     public function respond(): void
     {
@@ -82,7 +67,9 @@ class MS
             $this->emit();
         }
 
-        $this->redirect($this->redirectUrl);
+        throw new \RuntimeException(
+            'MS: respond() requer redirect().'
+        );
     }
 
     public function emit(): void
@@ -117,8 +104,8 @@ class MS
             $token = bin2hex(random_bytes(16));
 
             $_SESSION['ms_payload'][$token] = [
-                'data'    => $this->payload,
-                'expires'=> time() + 120
+                'data' => $this->payload,
+                'expires' => time() + 120
             ];
 
             $url .= (strpos($url, '?') !== false ? '&' : '?') . "ms_ref={$token}";
@@ -155,9 +142,7 @@ class MS
         return $entry['data'] ?? [];
     }
 
-    /* =========================================================
-     * Utilitários
-     * ======================================================= */
+    /* ================= Utilitários ================= */
 
     public function old(string $field, $default = null)
     {
@@ -179,65 +164,6 @@ class MS
             throw new \RuntimeException(
                 'MS: emit() foi chamado sem redirect() ou respond().'
             );
-        }
-    }
-
-    /* =========================================================
-     * Assets
-     * ======================================================= */
-
-    private function autoPublishAssets(): void
-    {
-        if (self::$assetsPublished || PHP_SAPI === 'cli') {
-            return;
-        }
-
-        self::$assetsPublished = true;
-
-        try {
-            $publicPath = defined('MS_PUBLIC_PATH')
-                ? MS_PUBLIC_PATH
-                : $this->resolvePublicPath();
-
-            $this->publishAssets($publicPath);
-        } catch (\Throwable $e) {
-            // Nunca quebrar a aplicação por assets
-            error_log($e->getMessage());
-        }
-    }
-
-    private function resolvePublicPath(): string
-    {
-        $root = dirname(__DIR__, 3);
-
-        return match (true) {
-            is_dir($root . '/public') => $root . '/public/ms',
-            is_dir($root . '/www')    => $root . '/www/ms',
-            default                  => $root . '/ms',
-        };
-    }
-
-    public function publishAssets(string $publicPath): void
-    {
-        $sourcePath = realpath(__DIR__ . '/../Front');
-
-        if (!$sourcePath) {
-            throw new \RuntimeException('MS: diretório de assets não encontrado.');
-        }
-
-        if (!is_dir($publicPath) && !mkdir($publicPath, 0755, true)) {
-            throw new \RuntimeException(
-                "MS: não foi possível criar {$publicPath}"
-            );
-        }
-
-        foreach (['ms.js', 'ms-ajax.js', 'ms.css', 'ms-theme.css'] as $file) {
-            $src = "{$sourcePath}/{$file}";
-            $dst = "{$publicPath}/{$file}";
-
-            if (!file_exists($dst)) {
-                copy($src, $dst);
-            }
         }
     }
 }

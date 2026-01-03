@@ -11,7 +11,8 @@
       "GdoisDev\\MSFramework\\": "src/"
     },
     "files": [
-      "src/Helpers/helpers.php"
+      "src/Helpers/helpers.php",
+      "src/Bootstrap/ms.php"
     ]
   },
   "require": {
@@ -22,8 +23,5 @@
       "name": "Geovane G. Silva",
       "email": "geovanegdois@gmail.com"
     }
-  ],
-  "bin": [
-    "bin/ms-install.php"
   ]
 }
