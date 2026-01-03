@@ -1,233 +1,171 @@
 MS Framework
-Visão Geral
 
-O MS Framework é uma biblioteca PHP open source para mensageria, controle de fluxo e padronização de respostas HTTP e AJAX, com suporte a mensagens flash e redirecionamentos controlados.
+MS Framework é um micro-framework PHP para mensageria, controle de fluxo, redirecionamentos, respostas AJAX e padronização de feedbacks em aplicações web.
 
-Ele foi projetado para aplicações PHP tradicionais que utilizam controllers e renderização de views, mas que também precisam lidar com requisições AJAX de forma previsível e consistente.
+Ele foi projetado para ser zero-config, autônomo e compatível com projetos PHP reais, incluindo ambientes legados.
 
-O MS não é um framework MVC completo. Ele atua como uma camada de serviço, responsável exclusivamente pela orquestração de respostas, mensagens e redirecionamentos, sem interferir na estrutura da aplicação.
+Requisitos
 
-Objetivo do Framework
+PHP >= 7.4
 
-O MS Framework resolve um problema recorrente em aplicações PHP:
-
-Como padronizar mensagens, payloads e redirecionamentos sem gerar conflitos entre controllers, views e JavaScript?
-
-Para isso, o MS adota um modelo explícito de resposta, onde cada controller deve assumir um único papel por action:
-
-Renderizar uma view
-
-OU finalizar uma resposta (HTTP ou AJAX)
-
-Essa separação elimina comportamentos ambíguos e torna o fluxo da aplicação previsível.
+Sessões habilitadas
 
 Instalação
 
-Instale o MS Framework via Composer:
+A instalação é feita exclusivamente via Composer:
 
 composer require gdoisdev/ms-framework
 
 
-Durante a instalação, os assets do framework são publicados automaticamente no diretório público /ms.
+Nenhuma configuração adicional é necessária.
+Não é preciso criar diretórios, rodar scripts ou alterar o composer.json do projeto.
 
-Conceitos Fundamentais
-Mensagem
+Publicação automática de assets (CSS e JS)
 
-Mensagem é qualquer feedback ao usuário:
+O MS Framework publica seus assets automaticamente na primeira execução web da aplicação.
 
-success
+O que acontece automaticamente
 
-info
+Cria o diretório ms/ no local público do projeto
 
-error
+Copia os arquivos de frontend do MS
 
-Exemplo:
+Executa apenas uma vez por projeto
 
-ms()->success("Operação realizada com sucesso!");
+Não quebra a aplicação em caso de falha
 
-Payload
+Diretórios públicos detectados (ordem de prioridade)
 
-Payload é o conjunto de dados associado à resposta.
+public/ms
 
-Pode conter dados reais
+www/ms
 
-Pode ser explicitamente vazio
+ms (raiz do projeto)
 
-O MS exige payload explícito para redirecionamentos HTTP.
+Também é possível definir manualmente:
 
-Finalização de resposta
+define('MS_PUBLIC_PATH', '/caminho/absoluto/para/ms');
 
-No MS, nem toda mensagem finaliza uma resposta.
+Arquivos publicados
 
-Existem métodos que apenas emitem mensagens e métodos que encerram o fluxo do controller.
+ms.js
 
-Métodos Principais
-emit()
+ms-ajax.js
 
-Emite a mensagem
+ms.css
 
-Não finaliza a execução do controller
+ms-theme.css
 
-Permite continuação do fluxo
+Um arquivo de controle é criado:
 
-Uso típico:
-
-Controllers que renderizam views
-
-Links (<a>) com ou sem data-ms="ajax"
-
-ms()->info("Mensagem informativa")->emit();
-
-respond()
-
-Finaliza a resposta
-
-Encerra a execução do controller
-
-Deve ser usado em actions finais
-
-Uso típico:
-
-Formulários AJAX
-
-Endpoints de API
-
-ms()->success("Salvo com sucesso")->respond();
-
-redirect()
-
-Redirecionamento HTTP tradicional
-
-Exige payload explícito
-
-ms()->success("Atualizado")
-   ->withPayload([])
-   ->redirect(url("/dashboard"));
-
-ajaxRedirect()
-
-Redirecionamento via AJAX
-
-Exige finalização com respond()
-
-ms()->error("Erro ao salvar")
-   ->ajaxRedirect(url("/form"))
-   ->respond();
-
-withPayload()
-
-Define explicitamente o payload da resposta.
-
-->withPayload([])
+ms-assets-installed
 
 
-⚠️ Não é gambiarra. É contrato explícito do framework.
+Ele garante que a publicação ocorra uma única vez.
 
-Tabela Oficial de Decisão
-Cenário	emit()	respond()	redirect()	ajaxRedirect()	withPayload([])	Observações
-Link normal (<a>)	✔	✖	✖	✖	✖	Renderiza view
-Link com data-ms="ajax"	✔	✖	✖	✖	✖	Renderiza view
-Controller que renderiza view	✔	✖	✖	✖	✖	Nunca finalize
-Formulário AJAX (CRUD)	✔	✔	✖	✔	✖	respond() obrigatório
-Formulário AJAX sem redirect	✔	✔	✖	✖	✖	Apenas feedback
-Formulário NÃO AJAX	✔	✖	✔	✖	✔	Payload obrigatório
-Redirect HTTP com mensagem	✔	✖	✔	✖	✔	Uso correto
-Redirect AJAX	✔	✔	✖	✔	✖	Fluxo final
-Action finalizadora (API)	✖	✔	✖	✖	✖	Sem render
-Render + redirect	❌	❌	❌	❌	❌	Arquiteturalmente inválido
-Regras de Ouro
-
-emit() nunca finaliza
-
-respond() sempre finaliza
-
-Controller renderiza OU redireciona, nunca ambos
-
-ajaxRedirect() exige respond()
-
-redirect() exige payload explícito
-
-withPayload([]) é contrato, não gambiarra
-
-Exemplos Completos
-Controller que renderiza view
-public function home(): void
-{
-    ms()->info("Bem-vindo")->emit();
-
-    echo $this->view->render("home");
-}
-
-Formulário AJAX
-if (!$model->save()) {
-    ms()->error("Erro ao salvar")
-       ->ajaxRedirect(url("/form"))
-       ->respond();
-}
-
-ms()->success("Salvo com sucesso")
-   ->ajaxRedirect(url("/lista"))
-   ->respond();
-
-Formulário NÃO AJAX
-ms()->success("Atualizado")
-   ->withPayload([])
-   ->redirect(url("/dashboard"));
-
-Uso dos Assets
-
-Inclua os arquivos diretamente no seu layout:
-
+Inclusão dos assets no HTML
 <link rel="stylesheet" href="/ms/ms.css">
 <link rel="stylesheet" href="/ms/ms-theme.css">
 
 <script src="/ms/ms.js"></script>
 <script src="/ms/ms-ajax.js"></script>
 
+Uso básico
+use GdoisDev\MSFramework\Core\MS;
 
-Se sua aplicação roda em subdiretório, ajuste o caminho conforme sua URL base.
+$ms = new MS();
 
-Observações Importantes
+$ms->success('Operação realizada com sucesso')
+   ->redirect('/dashboard');
 
-O MS Framework não depende de helpers do projeto
+Mensagens disponíveis
+$ms->success('Mensagem de sucesso');
+$ms->error('Mensagem de erro');
+$ms->warning('Mensagem de alerta');
+$ms->info('Mensagem informativa');
 
-Funciona em ambiente web e CLI
 
-Compatível com hospedagem compartilhada
+As mensagens são armazenadas em sessão (flash) automaticamente.
 
-Não sobrescreve assets existentes
+Redirecionamento
+$ms->redirect('/login');
 
-Estabilidade do Framework
 
-O MS Framework é considerado estável e pronto para uso em produção.
+Requisição normal → Location
 
-A estabilidade é garantida por:
+AJAX → JSON com redirect
 
-API pequena e coesa
+AJAX (automático)
 
-Contratos explícitos
+O MS detecta AJAX por:
 
-Separação clara entre emissão de mensagem e finalização de resposta
+XMLHttpRequest
 
-Quando as regras documentadas neste README são respeitadas, o comportamento é:
+Header HTTP_MS_REQUEST
 
-Determinístico
+Header HTTP_X_MS_AJAX
 
-Previsível
+Resposta AJAX padrão:
 
-Consistente entre HTTP e AJAX
+{
+  "messages": [...],
+  "redirect": "/destino"
+}
+
+Payload temporário entre requisições
+$ms->withPayload([
+    'id' => 123,
+    'email' => 'user@email.com'
+])->redirect('/destino');
+
+
+No destino:
+
+$data = $ms->payload();
+
+
+Uso único
+
+Expira automaticamente
+
+Seguro para fluxo entre controllers
+
+Recuperar valor antigo de formulário
+$value = $ms->old('email');
+
+Flash messages
+$ms->flash()->set('success', 'Mensagem flash');
+
+Segurança e robustez
+
+Assets nunca quebram a aplicação
+
+Execução automática somente em contexto web
+
+Totalmente compatível com PHP 7.4
+
+Nenhuma dependência de scripts de instalação
+
+Arquitetura idempotente
+
+Filosofia do MS
+
+Zero configuração
+
+Zero intervenção do usuário
+
+Instalação transparente
+
+Comportamento previsível
+
+Compatível com projetos legados e modernos
 
 Licença
 
-MIT License
-Copyright (c) 2025
+MIT © Geovane Gomes
 
-Considerações Finais
+Status do projeto
 
-O MS Framework adota uma filosofia clara:
-
-Ele não tenta adivinhar a intenção do desenvolvedor
-
-Ele exige decisões explícitas
-
-Esse é o preço — e o benefício — da previsibilidade arquitetural.
+✅ Estável
+✅ Em produção
+✅ Testado em projetos reais
