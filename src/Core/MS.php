@@ -28,6 +28,8 @@ class MS
 		if (!isset($_SESSION['ms_payload'])) {
 			$_SESSION['ms_payload'] = [];
 		}
+		
+		$this->autoPublishAssets();
     }
 
     /**
@@ -250,6 +252,34 @@ class MS
 			)
 		);
     }
+	
+	private function autoPublishAssets(): void
+	{
+		// 1. Caminho público definido explicitamente pelo projeto
+		if (defined('MS_PUBLIC_PATH')) {
+			$publicPath = MS_PUBLIC_PATH;
+		}
+		// 2. Variável de ambiente
+		elseif (!empty($_ENV['MS_PUBLIC_PATH'])) {
+			$publicPath = $_ENV['MS_PUBLIC_PATH'];
+		}
+		// 3. Fallback seguro e realista
+		else {
+			$projectRoot = dirname(__DIR__, 3);
+
+			if (is_dir($projectRoot . '/public')) {
+				$publicPath = $projectRoot . '/public/ms';
+			} elseif (is_dir($projectRoot . '/www')) {
+				$publicPath = $projectRoot . '/www/ms';
+			} else {
+				// Último fallback: raiz do projeto
+				$publicPath = $projectRoot . '/ms';
+			}
+		}
+
+		$this->publishAssets($publicPath);
+	}
+
 	
 	/* Publica os assets do MS Framework em um diretório público.
 	 * Método idempotente: só copia se não existir.

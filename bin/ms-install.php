@@ -12,13 +12,12 @@ use GdoisDev\MSFramework\Core\MS;
 
 /*
  |------------------------------------------------------------
- | Resolução do diretório público (filesystem, não URL)
- | Prioridade:
- | 1. Constante MS_PUBLIC_PATH (Config.php do projeto)
- | 2. Variável de ambiente MS_PUBLIC_PATH
- | 3. Fallback seguro
+ * Script utilitário para reinstalação manual dos assets do MS Framework.
+ * Uso opcional. O MS publica assets automaticamente no bootstrap.
  |------------------------------------------------------------
  */
+ 
+
 
 /**
  * Caminho do projeto que instalou o MS Framework
